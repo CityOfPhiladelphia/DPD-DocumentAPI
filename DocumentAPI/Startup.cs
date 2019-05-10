@@ -28,7 +28,7 @@ namespace DocumentAPI
 
             services.AddSingleton(httpClient);
 
-
+            
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
 

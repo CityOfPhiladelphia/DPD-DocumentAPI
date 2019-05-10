@@ -12,7 +12,7 @@ namespace DocumentAPI.Infrastructure.Models
 
     public class RootObject
     {
-        public List<object> Indexes { get; set; } = new List<object>();
+        public IEnumerable<object> Indexes { get; set; } = new List<object>();
         public FullText FullText { get; set; } = null;
         public object RetentionOptions { get; set; } = null;
         public object Name { get; set; } = null;

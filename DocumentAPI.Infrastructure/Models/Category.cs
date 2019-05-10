@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace DocumentAPI.Infrastructure.Models
@@ -11,7 +12,7 @@ namespace DocumentAPI.Infrastructure.Models
 
         public string DisplayName { get; set; }
 
-        public IList<Attribute> Attributes { get; set; }
+        public ICollection<Attribute> Attributes { get; set; }
     }
 
     public class Attribute
@@ -32,7 +33,7 @@ namespace DocumentAPI.Infrastructure.Models
     public class Type
     {
         public string Name { get; set; }
-        public IList<FilterType> FilterTypes { get; set; }
+        public IEnumerable<FilterType> FilterTypes { get; set; }
     }
 
 
@@ -48,7 +49,7 @@ namespace DocumentAPI.Infrastructure.Models
             var numericType = new Type
             {
                 Name = NumericTypeName,
-                FilterTypes = new List<FilterType>
+                FilterTypes = new Collection<FilterType>
                 {
                     new FilterType {Name = NumericEqualsOperator},
                     new FilterType {Name = NumericGreaterThanOperator},
@@ -60,7 +61,7 @@ namespace DocumentAPI.Infrastructure.Models
             var dateType = new Type
             {
                 Name = DateTypeName,
-                FilterTypes = new List<FilterType>
+                FilterTypes = new Collection<FilterType>
                 {
                     new FilterType{Name = DateEqualsOperator},
                     new FilterType{Name = DateGreaterThanOperator},
@@ -72,7 +73,7 @@ namespace DocumentAPI.Infrastructure.Models
             var textType = new Type
             {
                 Name = TextTypeName,
-                FilterTypes = new List<FilterType>
+                FilterTypes = new Collection<FilterType>
                 {
                     new FilterType{Name = TextEqualsOperator},
                     new FilterType{Name = TextGreaterThanOperator},
@@ -84,25 +85,25 @@ namespace DocumentAPI.Infrastructure.Models
             var fullTextType = new Type
             {
                 Name = FullTextSearchName,
-                FilterTypes = new List<FilterType>
+                FilterTypes = new Collection<FilterType>
                 {
                     new FilterType{Name = FullTextSearchName},
                 }
             };
 
-            AttributeTypes = new List<Type>
+            AttributeTypes = new Collection<Type>
             {
                 numericType, dateType, textType, fullTextType
             };
 
-            Categories = new List<Category>
+            Categories = new Collection<Category>
             {
                 new Category
                 {
                     Id = 6,
                     Name= "HISTORICAL_COMM-CARD_CATALOG",
                     DisplayName = "Card Catalog",
-                    Attributes = new List<Attribute>
+                    Attributes = new Collection<Attribute>
                     {
                         new Attribute
                         {
@@ -147,7 +148,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 7,
                     Name= "HISTORICAL_COMM-MEETING_MINUTES",
                     DisplayName = "Meeting Minutes",
-                    Attributes = new List<Attribute>
+                    Attributes = new Collection<Attribute>
                     {
                         new Attribute
                         {
@@ -180,7 +181,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 4,
                     Name= "HISTORICAL_COMM-PERMITS",
                     DisplayName = "Permits",
-                    Attributes = new List<Attribute>
+                    Attributes = new Collection<Attribute>
                     {
                         new Attribute
                         {
@@ -237,7 +238,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 3,
                     Name= "HISTORICAL_COMM-POLAROIDS",
                     DisplayName = "Polaroids",
-                    Attributes = new List<Attribute>
+                    Attributes = new Collection<Attribute>
                     {
                         new Attribute
                         {
@@ -264,7 +265,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 5,
                     Name= "HISTORICAL_COMM-REGISTRY",
                     DisplayName = "Registry",
-                    Attributes = new List<Attribute>
+                    Attributes = new Collection<Attribute>
                     {
                         new Attribute
                         {
@@ -289,15 +290,19 @@ namespace DocumentAPI.Infrastructure.Models
             };
 
             // Add full text search attribute to all Categories
-            Categories.ForEach(i => i.Attributes.Add(new Attribute
+            foreach (var category in Categories)
             {
-                FieldNumber = i.Attributes.Select(a => a.FieldNumber).Max() + 1,
-                Name = FullTextSearchName,
-                Type = fullTextType
-            }));
+                category.Attributes.Add(new Attribute
+                {
+                    FieldNumber = category.Attributes.Select(a => a.FieldNumber).Max() + 1,
+                    Name = FullTextSearchName,
+                    Type = fullTextType
+                });
+
+            }
         }
 
-        public static List<Type> AttributeTypes { get; }
+        public static IEnumerable<Type> AttributeTypes { get; }
 
         public const string NumericTypeName = "NUMERIC";
 
@@ -331,6 +336,6 @@ namespace DocumentAPI.Infrastructure.Models
 
         public const string FullTextSearchName = "FULL_TEXT";
 
-        public static List<Category> Categories { get; }
+        public static IEnumerable<Category> Categories { get; }
     }
 }

@@ -1,26 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Infrastructure.Models;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace DocumentAPI.Services
 {
     public class QueryAppsServices : IQueryAppsServices
     {
         private readonly HttpClient _httpClient;
+        private readonly Config _config;
 
-        public QueryAppsServices(HttpClient httpClient)
+        public QueryAppsServices(HttpClient httpClient, IConfiguration config)
         {
             _httpClient = httpClient;
+            _config = config.Load();
         }
 
         public async Task<QueryAppsResult> FilterQueryAppsResultByParameters(QueryAppsResult xTenderDocumentList, Category category)
@@ -102,13 +102,13 @@ namespace DocumentAPI.Services
                     xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => filteredEntryIds.Contains(i.Id)).ToList();
                 }
             }
-            
+
             return xTenderDocumentList;
         }
 
         private async Task<QueryAppsResult> FullTextRequestDocuments(string categoryName, string fullTextSearch)
         {
-            var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
+            var categoryId = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName)?.Id ?? 0;
             var adhocQueryObject = new RootObject
             {
                 FullText = new FullText
@@ -119,8 +119,8 @@ namespace DocumentAPI.Services
 
             var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryObject);
 
-            var query = new UriBuilder($"{Config.AdHocQueryResultsPath}/{category.Id}");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Config.Credentials);
+            var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{categoryId}");
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 
             var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json"));
@@ -133,12 +133,23 @@ namespace DocumentAPI.Services
         {
             var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
             var parameterString = string.Join(',', category?.Attributes.Select(i => "0")) ?? "0";
-            var query = new UriBuilder($"{Config.RequestBasePath}/{Config.QueryAppsPath}/{category.Name}/{parameterString}/{Config.Credentials}");
+            var query = new UriBuilder($"{_config.RequestBasePath}/{_config.QueryAppsPath}/{category.Name}/{parameterString}/{_config.Credentials}");
 
             var request = await _httpClient.GetStringAsync(query.Uri);
             var result = JsonConvert.DeserializeObject<QueryAppsResult>(request);
 
             return result;
+        }
+
+        public HttpRequestMessage BuildDocumentRequest(string categoryName, int documentId)
+        {
+            var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{categoryName}/{documentId}/PDF/{_config.Credentials}");
+            var requestMessage = new HttpRequestMessage
+            {
+                RequestUri = getFile.Uri,
+                Method = HttpMethod.Get
+            };
+            return requestMessage;
         }
 
         public async Task<Stream> GetResponse(HttpRequestMessage requestMessage)

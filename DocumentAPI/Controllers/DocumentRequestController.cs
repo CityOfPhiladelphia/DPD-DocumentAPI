@@ -1,12 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using DocumentAPI.Infrastructure;
 using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Infrastructure.Models;
 
@@ -72,13 +65,8 @@ namespace DocumentAPI.Controllers
         [Produces("application/pdf")]
         public async Task<FileStreamResult> GetDocument(string categoryName, int documentId)
         {
-            var getFile = new UriBuilder($"{Config.RequestBasePath}/{Config.ExportDocumentPath}/{categoryName}/{documentId}/PDF/{Config.Credentials}");
-            var requestMessage = new HttpRequestMessage
-            {
-                RequestUri = getFile.Uri,
-                Method = HttpMethod.Get
-            };
-            var file = await _queryAppsServices.GetResponse(requestMessage);
+            var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
+            var file = await _queryAppsServices.GetResponse(request);
 
             return new FileStreamResult(file, "application/pdf");
         }

@@ -21,6 +21,7 @@
   </ItemGroup>
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UserSecretsId>8db83a4c-f226-43a0-94a6-f22539740c94</UserSecretsId>
   </PropertyGroup>
 
 </Project>

@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace DocumentAPI.Infrastructure.Models
 {
     public class QueryAppsResult
     {
-        public List<string> Columns { get; }
+        public string[] Columns { get; set; }
 
-        public IList<Entry> Entries { get; set; }
+        public IEnumerable<Entry> Entries { get; set; }
     }
 
     public class Entry
@@ -15,12 +17,12 @@ namespace DocumentAPI.Infrastructure.Models
 
         public int PageCount { get; set; }
 
-        public List<string> IndexValues { get; }
+        public IList<string> IndexValues { get; set; }
     }
 
     public class ApiResult
     {
-        public List<FormattedEntry> Entries { get; } = new List<FormattedEntry>();
+        public ICollection<FormattedEntry> Entries { get; } = new Collection<FormattedEntry>();
     }
 
     public class FormattedEntry : Entry
@@ -28,7 +30,7 @@ namespace DocumentAPI.Infrastructure.Models
         public new Dictionary<string, string> IndexValues { get; } = new Dictionary<string, string>();
     }
 
-    public static class Extensions
+    public static class QueryAppsExtensions
     {
         public static ApiResult ToApiResult(this QueryAppsResult queryAppsResult)
         {

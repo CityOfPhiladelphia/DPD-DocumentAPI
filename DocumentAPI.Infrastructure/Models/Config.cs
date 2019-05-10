@@ -1,17 +1,35 @@
-﻿namespace DocumentAPI.Infrastructure.Models
+﻿using Microsoft.Extensions.Configuration;
+
+namespace DocumentAPI.Infrastructure.Models
 {
-    public static class Config
+    public class Config
     {
-        public const string Credentials = "SElTVC5TVkM6SGlzdG9yaWNhbDE=";
+        public string Credentials { get; set; }
 
-        public const string RequestBasePath = "http://testapigateway.phila.gov:4444/gateway/AXImaging/1.0/AXImaging/webService";
+        public string RequestBasePath { get; set; }
 
-        public const string AdHocQueryResultsPath = "http://copaxwxprd/AppXtenderReST/api/AXDataSources/AXNEWPRD/AXAdhocQueryResults";
-        
-        public const string QueryAppsPath = "queryapps";
+        public string AdHocQueryResultsPath { get; set; }
 
-        public const string RetrieveDocumentPath = "retrieveDocument";
+        public string QueryAppsPath { get; set; }
 
-        public const string ExportDocumentPath = "exportDoc";
+        public string RetrieveDocumentPath { get; set; }
+
+        public string ExportDocumentPath { get; set; }
+    }
+
+    public static class ConfigExtensions
+    {
+        public static Config Load(this IConfiguration config)
+        {
+            return new Config
+            {
+                Credentials = config["Credentials"],
+                RequestBasePath = config["RequestBasePath"],
+                AdHocQueryResultsPath = config["AdHocQueryResultsPath"],
+                QueryAppsPath = config["QueryAppsPath"],
+                RetrieveDocumentPath = config["RetrieveDocumentPath"],
+                ExportDocumentPath = config["ExportDocumentPath"]
+            };
+        }
     }
 }
