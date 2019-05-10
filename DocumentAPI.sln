@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentAPI.Services", "Doc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentAPI.Infrastructure", "DocumentAPI.Infrastructure\DocumentAPI.Infrastructure.csproj", "{FB161D93-479D-424C-9EC6-B0504923CBD8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentAPI.Tests", "DocumentAPI.Tests\DocumentAPI.Tests.csproj", "{A53E4A95-0339-44F2-AC94-EA765976D71E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{FB161D93-479D-424C-9EC6-B0504923CBD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB161D93-479D-424C-9EC6-B0504923CBD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB161D93-479D-424C-9EC6-B0504923CBD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A53E4A95-0339-44F2-AC94-EA765976D71E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A53E4A95-0339-44F2-AC94-EA765976D71E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A53E4A95-0339-44F2-AC94-EA765976D71E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A53E4A95-0339-44F2-AC94-EA765976D71E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
