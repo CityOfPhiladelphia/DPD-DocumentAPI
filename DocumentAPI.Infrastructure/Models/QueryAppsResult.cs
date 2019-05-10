@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 
 namespace DocumentAPI.Infrastructure.Models
 {
