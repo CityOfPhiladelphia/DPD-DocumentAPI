@@ -153,26 +153,38 @@ namespace DocumentAPI.Infrastructure.Models
                         new Attribute
                         {
                             FieldNumber = 1,
-                            Name = "MEETING DATE",
-                            Type = dateType
+                            Name = "DOCUMENT NAME",
+                            Type = textType
                         },
                         new Attribute
                         {
                             FieldNumber = 2,
-                            Name = "MEETING DESIGNATION",
-                            Type = numericType
-                        },
-                        new Attribute
-                        {
-                            FieldNumber = 3,
-                            Name = "SCAN DATE",
+                            Name = "DOCUMENT DATE",
                             Type = dateType
                         },
                         new Attribute
                         {
-                            FieldNumber = 4,
-                            Name = "BOX #",
+                            FieldNumber = 3,
+                            Name = "MEETING NUMBER",
                             Type = numericType
+                        },
+                        new Attribute
+                        {
+                            FieldNumber = 4,
+                            Name = "BODY",
+                            Type = textType
+                        },
+                        new Attribute
+                        {
+                            FieldNumber = 5,
+                            Name = "COMMENT",
+                            Type = textType
+                        },
+                        new Attribute
+                        {
+                            FieldNumber = 6,
+                            Name = "ARCHIVE DATE",
+                            Type = dateType
                         }
                     }
                 },
