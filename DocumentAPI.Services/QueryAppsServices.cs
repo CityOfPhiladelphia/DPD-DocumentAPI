@@ -23,49 +23,53 @@ namespace DocumentAPI.Services
             _config = config.Load();
         }
 
-        public async Task<QueryAppsResult> FilterQueryAppsResultByParameters(QueryAppsResult xTenderDocumentList, Category category)
+        public async Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category)
         {
             var filteredAttributes = category.Attributes.Where(i => i.SelectedFilterType != null);
+            var adhocQueryObject = new AdhocQueryRequest();
+
             foreach (var filteredAttribute in filteredAttributes)
             {
+                var query = "";
                 if (filteredAttribute.Type.Name == DocumentCategories.TextTypeName)
                 {
                     var stringFilter1 = filteredAttribute.FilterValue1;
+                    var stringFilter2 = filteredAttribute.FilterValue2;
+
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
                         case DocumentCategories.NumericEqualsOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => i.IndexValues[filteredAttribute.FieldNumber - 1].ToString() == stringFilter1).ToList();
+                            query = $"{stringFilter1}";
                             break;
                         case DocumentCategories.NumericGreaterThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => i.IndexValues[filteredAttribute.FieldNumber - 1].ToString().StartsWith(stringFilter1)).ToList();
+                            query = $"Expression: > {stringFilter1}";
                             break;
                         case DocumentCategories.NumericLessThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => i.IndexValues[filteredAttribute.FieldNumber - 1].ToString().EndsWith(stringFilter1)).ToList();
+                            query = $"Expression: < {stringFilter1}";
                             break;
                         case DocumentCategories.NumericBetweenOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => i.IndexValues[filteredAttribute.FieldNumber - 1].ToString().Contains(stringFilter1)).ToList();
+                            query = $"Expression: ['{stringFilter1}','{stringFilter2}']";
                             break;
                     }
                 }
                 else if (filteredAttribute.Type.Name == DocumentCategories.DateTypeName)
                 {
-                    var dateFilter1 = DateTime.TryParse(filteredAttribute.FilterValue1, out var date1Value) ? date1Value : DateTime.MinValue;
-                    var dateFilter2 = DateTime.TryParse(filteredAttribute.FilterValue2, out var date2Value) ? date2Value : DateTime.MinValue;
-                    DateTime ParsedIndexValue(Entry i) => DateTime.TryParse(i.IndexValues[filteredAttribute.FieldNumber - 1], out var dateIndexValue) ? dateIndexValue : DateTime.MinValue;
+                    var dateFilter1 = (DateTime.TryParse(filteredAttribute.FilterValue1, out var date1Value) ? date1Value : DateTime.MinValue).ToShortDateString();
+                    var dateFilter2 = (DateTime.TryParse(filteredAttribute.FilterValue2, out var date2Value) ? date2Value : DateTime.MinValue).ToShortDateString();
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
                         case DocumentCategories.DateEqualsOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) == dateFilter1).ToList();
+                            query = $"{dateFilter1}";
                             break;
                         case DocumentCategories.DateGreaterThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) > dateFilter1).ToList();
+                            query = $"Expression: > {dateFilter1}";
                             break;
                         case DocumentCategories.DateLessThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) < dateFilter1).ToList();
+                            query = $"Expression: < {dateFilter1}";
                             break;
                         case DocumentCategories.DateBetweenOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) > dateFilter1 && ParsedIndexValue(i) < dateFilter2).ToList();
+                            query = $"Expression: ['{dateFilter1}','{dateFilter2}']";
                             break;
                     }
                 }
@@ -73,63 +77,61 @@ namespace DocumentAPI.Services
                 {
                     var numericFilter1 = int.TryParse(filteredAttribute.FilterValue1, out var int1Value) ? int1Value : -1;
                     var numericFilter2 = int.TryParse(filteredAttribute.FilterValue2, out var int2Value) ? int2Value : -1;
-                    int ParsedIndexValue(Entry i) => int.TryParse(i.IndexValues[filteredAttribute.FieldNumber - 1].ToString(), out var intIndexValue) ? intIndexValue : -1;
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
                         case DocumentCategories.NumericEqualsOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) == numericFilter1).ToList();
+                            query = $"{numericFilter1}";
                             break;
                         case DocumentCategories.NumericGreaterThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) > numericFilter1).ToList();
+                            query = $"Expression: > {numericFilter1}";
                             break;
                         case DocumentCategories.NumericLessThanOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) < numericFilter1).ToList();
+                            query = $"Expression: < {numericFilter1}";
                             break;
                         case DocumentCategories.NumericBetweenOperator:
-                            xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => ParsedIndexValue(i) > numericFilter1 && ParsedIndexValue(i) < numericFilter2).ToList();
+                            query = $"Expression: ['{numericFilter1}','{numericFilter2}']";
                             break;
                     }
                 }
                 else if (filteredAttribute.Type.Name == DocumentCategories.FullTextSearchName)
                 {
-                    var stringFilter1 = filteredAttribute.FilterValue1;
-
-                    var fullTextFilteredDocuments = await FullTextRequestDocuments(category.Name, stringFilter1);
-
-                    var filteredEntryIds = fullTextFilteredDocuments.Entries.Select(i => i.Id);
-
-                    xTenderDocumentList.Entries = xTenderDocumentList.Entries.Where(i => filteredEntryIds.Contains(i.Id)).ToList();
+                    query = filteredAttribute.FilterValue1;
                 }
+
+                adhocQueryObject.Indexes.Add(new Index
+                {
+                    Name = filteredAttribute.Name,
+                    Value = query
+                });
             }
+
+
+            var xTenderDocumentList = await RequestDocuments(category.Name, adhocQueryObject);
 
             return xTenderDocumentList;
         }
 
-        private async Task<QueryAppsResult> FullTextRequestDocuments(string categoryName, string fullTextSearch)
+        private async Task<QueryAppsResult> RequestDocuments(string categoryName, AdhocQueryRequest adhocQueryRequest)
         {
-            var categoryId = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName)?.Id ?? 0;
-            var adhocQueryObject = new RootObject
-            {
-                FullText = new FullText
-                {
-                    Value = fullTextSearch
-                }
-            };
+            var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
+            var categoryId = category?.Id ?? 0;
 
-            var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryObject);
+            var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest);
 
             var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{categoryId}");
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 
-            var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json"));
-
-            var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
-            return result;
+            using (var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json")))
+            {
+                var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
+                var filteredResult = ExcludeNonPublicDocuments(result, category);
+                return filteredResult;
+            }
         }
 
-        public async Task<QueryAppsResult> RequestDocuments(string categoryName)
+        public async Task<QueryAppsResult> GetTopResults(string categoryName)
         {
             var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
             var parameterString = string.Join(',', category?.Attributes.Select(i => "0")) ?? "0";
@@ -138,6 +140,21 @@ namespace DocumentAPI.Services
             var request = await _httpClient.GetStringAsync(query.Uri);
             var result = JsonConvert.DeserializeObject<QueryAppsResult>(request);
 
+            var filteredResult = ExcludeNonPublicDocuments(result, category);
+            return filteredResult;
+        }
+
+        private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
+        {
+            var columnIndex = Array.FindIndex(result.Columns, i => i == category.NotPublicFieldName);
+
+            if (columnIndex > -1)
+            {
+                result.Entries = result.Entries.Where(i =>
+                    // parse and filter out entries where Not Public equals true
+                    !(bool.Parse(i.IndexValues[columnIndex]))
+                );
+            };
             return result;
         }
 

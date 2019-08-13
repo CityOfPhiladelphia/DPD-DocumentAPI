@@ -7,9 +7,9 @@ namespace DocumentAPI.Infrastructure.Interfaces
 {
     public interface IQueryAppsServices
     {
-        Task<QueryAppsResult> FilterQueryAppsResultByParameters(QueryAppsResult xTenderDocumentList, Category category);
+        Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category);
 
-        Task<QueryAppsResult> RequestDocuments(string categoryName);
+        Task<QueryAppsResult> GetTopResults(string categoryName);
 
         HttpRequestMessage BuildDocumentRequest(string categoryName, int documentId);
 

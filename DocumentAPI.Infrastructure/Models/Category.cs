@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -13,6 +14,8 @@ namespace DocumentAPI.Infrastructure.Models
         public string DisplayName { get; set; }
 
         public ICollection<Attribute> Attributes { get; set; }
+        public string NotPublicFieldName { get; set; }
+
     }
 
     public class Attribute
@@ -148,6 +151,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 7,
                     Name= "HISTORICAL_COMM-MEETING_MINUTES",
                     DisplayName = "Meeting Minutes",
+                    NotPublicFieldName = "NOT PUBLIC",
                     Attributes = new Collection<Attribute>
                     {
                         new Attribute
@@ -165,24 +169,30 @@ namespace DocumentAPI.Infrastructure.Models
                         new Attribute
                         {
                             FieldNumber = 3,
+                            Name = "DOCUMENT TYPE",
+                            Type = textType
+                        },
+                        new Attribute
+                        {
+                            FieldNumber = 4,
                             Name = "MEETING NUMBER",
                             Type = numericType
                         },
                         new Attribute
                         {
-                            FieldNumber = 4,
+                            FieldNumber = 5,
                             Name = "BODY",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 5,
+                            FieldNumber = 6,
                             Name = "COMMENT",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 6,
+                            FieldNumber = 7,
                             Name = "ARCHIVE DATE",
                             Type = dateType
                         }

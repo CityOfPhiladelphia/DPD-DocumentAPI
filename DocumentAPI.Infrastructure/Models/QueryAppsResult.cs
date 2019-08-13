@@ -51,5 +51,36 @@ namespace DocumentAPI.Infrastructure.Models
 
             return apiResult;
         }
+
+        public static Category BuildCategoryWithFilters(this Category documentCategory,
+            string selectedFilterName1, string selectedFilterType1, string[] selectedFilterValues1,
+            string selectedFilterName2 = null, string selectedFilterType2 = null, string[] selectedFilterValues2 = null)
+        {
+
+            foreach (var attribute in documentCategory.Attributes)
+            {
+                var betweenOperators = new Collection<string> { DocumentCategories.DateBetweenOperator, DocumentCategories.NumericBetweenOperator, DocumentCategories.TextBetweenOperator };
+
+                if (attribute.Name == selectedFilterName1)
+                {
+                    attribute.SelectedFilterType = new FilterType { Name = selectedFilterType1 };
+                    attribute.FilterValue1 = selectedFilterValues1[0];
+                    if (betweenOperators.Contains(selectedFilterType1))
+                    {
+                        attribute.FilterValue2 = selectedFilterValues1[1];
+                    }
+                }
+                else if (attribute.Name == selectedFilterName2)
+                {
+                    attribute.SelectedFilterType = new FilterType { Name = selectedFilterType2 };
+                    attribute.FilterValue1 = selectedFilterValues2[0];
+                    if (betweenOperators.Contains(selectedFilterType1))
+                    {
+                        attribute.FilterValue2 = selectedFilterValues2[1];
+                    }
+                }
+            }
+            return documentCategory;
+        }
     }
 }

@@ -36,7 +36,7 @@ namespace DocumentAPI.Controllers
         [HttpGet("document-list/{categoryName}")]
         public async Task<JsonResult> GetDocumentList(string categoryName)
         {
-            var xTenderDocumentList = await _queryAppsServices.RequestDocuments(categoryName);
+            var xTenderDocumentList = await _queryAppsServices.GetTopResults(categoryName);
             return new JsonResult(xTenderDocumentList.ToApiResult());
         }
 
@@ -49,8 +49,7 @@ namespace DocumentAPI.Controllers
         [HttpPost("filtered-document-list")]
         public async Task<JsonResult> GetFilteredDocumentList([FromBody]Category category)
         {
-            var xTenderDocumentList = await _queryAppsServices.RequestDocuments(category.Name);
-            xTenderDocumentList= await _queryAppsServices.FilterQueryAppsResultByParameters(xTenderDocumentList, category);
+            var xTenderDocumentList = await _queryAppsServices.FilterQueryAppsResultByParameters(category);
             return new JsonResult(xTenderDocumentList.ToApiResult());
         }
 
@@ -69,6 +68,20 @@ namespace DocumentAPI.Controllers
             var file = await _queryAppsServices.GetResponse(request);
 
             return new FileStreamResult(file, "application/pdf");
+
+
+            //            var isPublic = 
+            //if (isPublic)
+            //{
+            //    var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
+            //    var file = await _queryAppsServices.GetResponse(request);
+
+            //    return new FileStreamResult(file, "application/pdf");
+            //}
+            //else
+            //{
+            //    return StatusCode(404, "Not Found");
+            //}
         }
     }
 }

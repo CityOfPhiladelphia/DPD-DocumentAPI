@@ -10,9 +10,18 @@ namespace DocumentAPI.Infrastructure.Models
         public string Value { get; set; }
     }
 
-    public class RootObject
+    public class Index
     {
-        public IEnumerable<object> Indexes { get; set; } = new List<object>();
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public bool IsODMAField { get; set; } = false;
+        public bool Searchable { get; set; } = true;
+        public bool Displayable { get; set; } = true;
+    }
+
+    public class AdhocQueryRequest
+    {
+        public ICollection<Index> Indexes { get; set; } = new List<Index>();
         public FullText FullText { get; set; } = null;
         public object RetentionOptions { get; set; } = null;
         public object Name { get; set; } = null;
