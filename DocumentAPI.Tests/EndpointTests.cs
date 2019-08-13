@@ -1,24 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
-using DocumentAPI;
-using DocumentAPI.Infrastructure.Models;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Xunit.Sdk;
 
 namespace DocumentAPI.Tests
 {
-    public class DocumentApiTest
+    public class EndpointTests
     {
         private readonly HttpClient _httpClient;
 
-        public DocumentApiTest()
+        public EndpointTests()
         {
             var server = new TestServer(new WebHostBuilder()
                 .ConfigureAppConfiguration(config => config.AddUserSecrets<Startup>())
@@ -26,10 +20,12 @@ namespace DocumentAPI.Tests
                 .UseStartup<Startup>());
 
             _httpClient = server.CreateClient();
+
         }
 
         [Theory]
         [InlineData("GET")]
+        [InlineData("POST")]
         public async Task GetDocumentCategoriesTestAsync(string method)
         {
             // Arrange
@@ -39,9 +35,16 @@ namespace DocumentAPI.Tests
             var response = await _httpClient.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            if (response.IsSuccessStatusCode)
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+            else
+            {
+                Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+            }
         }
+
 
         [Theory]
         [InlineData("GET", "HISTORICAL_COMM-CARD_CATALOG")]
