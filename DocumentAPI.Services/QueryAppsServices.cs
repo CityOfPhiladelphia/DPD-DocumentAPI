@@ -131,19 +131,6 @@ namespace DocumentAPI.Services
             }
         }
 
-        public async Task<QueryAppsResult> GetTopResults(string categoryName)
-        {
-            var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
-            var parameterString = string.Join(',', category?.Attributes.Select(i => "0")) ?? "0";
-            var query = new UriBuilder($"{_config.RequestBasePath}/{_config.QueryAppsPath}/{category.Name}/{parameterString}/{_config.Credentials}");
-
-            var request = await _httpClient.GetStringAsync(query.Uri);
-            var result = JsonConvert.DeserializeObject<QueryAppsResult>(request);
-
-            var filteredResult = ExcludeNonPublicDocuments(result, category);
-            return filteredResult;
-        }
-
         private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
         {
             var columnIndex = Array.FindIndex(result.Columns, i => i == category.NotPublicFieldName);
