@@ -9,6 +9,10 @@ using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal;
+using Newtonsoft.Json;
 
 namespace DocumentAPI
 {
@@ -28,7 +32,7 @@ namespace DocumentAPI
 
             services.AddSingleton(httpClient);
 
-            
+
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
 
@@ -62,6 +66,32 @@ namespace DocumentAPI
             }
 
             app.UseHttpsRedirection();
+
+            app.UseExceptionHandler(config =>
+            {
+                config.Run(async context =>
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "application/json";
+
+                    var error = context.Features.Get<IExceptionHandlerFeature>();
+                    if (error != null)
+                    {
+                        var message = "Unexpected error";
+                        var description = "Unexpected error";
+
+                        var ex = error.Error;
+
+                        await context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                        {
+                            Message = message,
+                            Description = description
+                        }));
+
+                    }
+                });
+            });
+
             app.UseMvc();
         }
     }
