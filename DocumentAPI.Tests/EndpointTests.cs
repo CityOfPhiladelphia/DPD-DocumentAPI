@@ -32,57 +32,48 @@ namespace DocumentAPI.Tests
             var request = new HttpRequestMessage(new HttpMethod(method), "/api/v1/document-request/document-categories");
 
             // Act
-            var response = await _httpClient.SendAsync(request);
+            using (var response = await _httpClient.SendAsync(request))
+            {
 
-            // Assert
-            if (response.IsSuccessStatusCode)
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
-            else
-            {
-                Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+                // Assert
+                if (response.IsSuccessStatusCode)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+                else
+                {
+                    Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+                }
             }
         }
 
-
         [Theory]
-        [InlineData("GET", "HISTORICAL_COMM-CARD_CATALOG")]
-        [InlineData("GET", "HISTORICAL_COMM-MEETING_MINUTES")]
-        [InlineData("GET", "HISTORICAL_COMM-PERMITS")]
-        [InlineData("GET", "HISTORICAL_COMM-POLAROIDS")]
-        [InlineData("GET", "HISTORICAL_COMM-REGISTRY")]
-
-        public async Task GetDocumentListTestAsync(string method, string categoryName)
-        {
-            // Arrange
-            var request = new HttpRequestMessage(new HttpMethod(method), $"/api/v1/document-request/document-list/{categoryName}");
-
-            // Act
-            var response = await _httpClient.SendAsync(request);
-
-            // Assert
-            response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Theory]
-        [InlineData("GET", "HISTORICAL_COMM-CARD_CATALOG", 1)]
-        [InlineData("GET", "HISTORICAL_COMM-MEETING_MINUTES", 1)]
-        [InlineData("GET", "HISTORICAL_COMM-PERMITS", 1)]
+        [InlineData("GET", "HISTORICAL_COMM-CARD_CATALOG", 744)]
+        [InlineData("GET", "HISTORICAL_COMM-MEETING_MINUTES", 1882)]
+        [InlineData("GET", "HISTORICAL_COMM-MEETING_MINUTES", 743, false)]
+        [InlineData("GET", "HISTORICAL_COMM-PERMITS", 1233)]
         [InlineData("GET", "HISTORICAL_COMM-POLAROIDS", 1)]
-        [InlineData("GET", "HISTORICAL_COMM-REGISTRY", 1)]
-        public async Task GetDocumentTestAsync(string method, string categoryName, int documentId)
+        [InlineData("GET", "HISTORICAL_COMM-REGISTRY", 700)]
+        public async Task GetDocumentTestAsync(string method, string categoryName, int documentId, bool isPublic = true)
         {
             // Arrange
             var request = new HttpRequestMessage(new HttpMethod(method), $"/api/v1/document-request/get-document/{categoryName}/{documentId}");
 
             // Act
-            var response = await _httpClient.SendAsync(request);
+            using (var response = await _httpClient.SendAsync(request))
+            {
+                // Assert
+                if (isPublic)
+                {
+                    response.EnsureSuccessStatusCode();
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+                else
+                {
+                    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                }
 
-            // Assert
-            response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
         }
     }
 }

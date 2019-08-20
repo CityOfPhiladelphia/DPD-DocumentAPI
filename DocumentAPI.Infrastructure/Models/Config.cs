@@ -9,6 +9,7 @@ namespace DocumentAPI.Infrastructure.Models
         public string RequestBasePath { get; set; }
 
         public string AdHocQueryResultsPath { get; set; }
+        public string SelectIndexLookupPath { get; set; }
 
         public string QueryAppsPath { get; set; }
 
@@ -26,6 +27,7 @@ namespace DocumentAPI.Infrastructure.Models
                 Credentials = config["Credentials"],
                 RequestBasePath = config["RequestBasePath"],
                 AdHocQueryResultsPath = config["AdHocQueryResultsPath"],
+                SelectIndexLookupPath = config["SelectIndexLookupPath"],
                 QueryAppsPath = config["QueryAppsPath"],
                 RetrieveDocumentPath = config["RetrieveDocumentPath"],
                 ExportDocumentPath = config["ExportDocumentPath"]

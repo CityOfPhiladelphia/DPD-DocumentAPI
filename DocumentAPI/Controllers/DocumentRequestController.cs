@@ -27,19 +27,6 @@ namespace DocumentAPI.Controllers
             return new JsonResult(DocumentCategories.Categories);
         }
 
-        // GET: api/v1/document-request/document-list/{categoryName}
-        /// <summary>
-        /// Pass in name of Category to get list of all documents and their attributes.
-        /// </summary>
-        /// <param name="categoryName">The Name property of the category object, which represents the name of the repository in ApplicationXTender</param>
-        /// <returns>Json(QueryAppsResult)</returns>
-        [HttpGet("document-list/{categoryName}")]
-        public async Task<JsonResult> GetDocumentList(string categoryName)
-        {
-            var xTenderDocumentList = await _queryAppsServices.GetTopResults(categoryName);
-            return new JsonResult(xTenderDocumentList.ToApiResult());
-        }
-
         // POST: api/v1/document-request/filtered-document-list
         /// <summary>
         /// Pass a Category object with filters applied in the body of the request to retrieve a filtered list of documents and their attributes.
@@ -61,27 +48,20 @@ namespace DocumentAPI.Controllers
         /// <param name="documentId">The Id that uniquely identifies the document in the ApplicationXTender repository</param>
         /// <returns>FileStream(PDF)</returns>
         [HttpGet("get-document/{categoryName}/{documentId}")]
-        [Produces("application/pdf")]
-        public async Task<FileStreamResult> GetDocument(string categoryName, int documentId)
+        [Produces("application/pdf", "application/problem+json")]
+        public async Task<IActionResult> GetDocument(string categoryName, int documentId)
         {
+            var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(categoryName, documentId);
+
+            if (!await isPublic)
+            {
+                return NotFound();
+            };
+
             var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
+
             var file = await _queryAppsServices.GetResponse(request);
-
             return new FileStreamResult(file, "application/pdf");
-
-
-            //            var isPublic = 
-            //if (isPublic)
-            //{
-            //    var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
-            //    var file = await _queryAppsServices.GetResponse(request);
-
-            //    return new FileStreamResult(file, "application/pdf");
-            //}
-            //else
-            //{
-            //    return StatusCode(404, "Not Found");
-            //}
         }
     }
 }

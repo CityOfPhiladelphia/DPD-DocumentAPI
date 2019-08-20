@@ -66,31 +66,33 @@ namespace DocumentAPI
             }
 
             app.UseHttpsRedirection();
-
-            app.UseExceptionHandler(config =>
+            if (env.IsProduction())
             {
-                config.Run(async context =>
+                app.UseExceptionHandler(config =>
                 {
-                    context.Response.StatusCode = 500;
-                    context.Response.ContentType = "application/json";
-
-                    var error = context.Features.Get<IExceptionHandlerFeature>();
-                    if (error != null)
+                    config.Run(async context =>
                     {
-                        var message = "Unexpected error";
-                        var description = "Unexpected error";
+                        context.Response.StatusCode = 500;
+                        context.Response.ContentType = "application/json";
 
-                        var ex = error.Error;
-
-                        await context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+                        if (error != null)
                         {
-                            Message = message,
-                            Description = description
-                        }));
+                            var message = "Unexpected error";
+                            var description = "Unexpected error";
 
-                    }
+                            var ex = error.Error;
+
+                            await context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                            {
+                                Message = message,
+                                Description = description
+                            }));
+
+                        }
+                    });
                 });
-            });
+            }
 
             app.UseMvc();
         }
