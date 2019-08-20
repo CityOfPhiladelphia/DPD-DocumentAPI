@@ -9,6 +9,7 @@ namespace DocumentAPI.Infrastructure.Interfaces
     {
         Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category);
         HttpRequestMessage BuildDocumentRequest(string categoryName, int documentId);
+        Task<bool> CheckIfDocumentIsPublic(string categoryName, int documentId);
         Task<Stream> GetResponse(HttpRequestMessage requestMessage);
     }
 }

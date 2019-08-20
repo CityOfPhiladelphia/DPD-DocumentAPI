@@ -48,27 +48,20 @@ namespace DocumentAPI.Controllers
         /// <param name="documentId">The Id that uniquely identifies the document in the ApplicationXTender repository</param>
         /// <returns>FileStream(PDF)</returns>
         [HttpGet("get-document/{categoryName}/{documentId}")]
-        [Produces("application/pdf")]
-        public async Task<FileStreamResult> GetDocument(string categoryName, int documentId)
+        [Produces("application/pdf", "application/problem+json")]
+        public async Task<IActionResult> GetDocument(string categoryName, int documentId)
         {
+            var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(categoryName, documentId);
+
+            if (!await isPublic)
+            {
+                return NotFound();
+            };
+
             var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
+
             var file = await _queryAppsServices.GetResponse(request);
-
             return new FileStreamResult(file, "application/pdf");
-
-
-            //            var isPublic = 
-            //if (isPublic)
-            //{
-            //    var request = _queryAppsServices.BuildDocumentRequest(categoryName, documentId);
-            //    var file = await _queryAppsServices.GetResponse(request);
-
-            //    return new FileStreamResult(file, "application/pdf");
-            //}
-            //else
-            //{
-            //    return StatusCode(404, "Not Found");
-            //}
         }
     }
 }
