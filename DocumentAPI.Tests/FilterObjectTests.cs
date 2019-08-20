@@ -31,6 +31,8 @@ namespace DocumentAPI.Tests
         [InlineData("HISTORICAL_COMM-MEETING_MINUTES", "MEETING NUMBER", "EQUALS", new[] { "318" })]
         [InlineData("HISTORICAL_COMM-MEETING_MINUTES", "MEETING NUMBER", "GREATER THAN", new[] { "100" })]
         [InlineData("HISTORICAL_COMM-MEETING_MINUTES", "MEETING NUMBER", "BETWEEN", new[] { "100", "150" })]
+        [InlineData("HISTORICAL_COMM-MEETING_MINUTES", "FULL_TEXT", "FULL_TEXT", new[] { "Spring Garden" })]
+        [InlineData("HISTORICAL_COMM-MEETING_MINUTES", "FULL_TEXT", "FULL_TEXT", new[] { "City Hall" })]
         public async Task GetFilteredDocumentList_BySingleParameter_ShouldReturnResults(string categoryName,
             string selectedFilterName1, string selectedFilterType1, string[] selectedFilterValues)
         {
@@ -76,7 +78,6 @@ namespace DocumentAPI.Tests
             // None of the results should be marked "not public"
             Assert.False(apiResultTest.Entries.Where(i => bool.Parse(i.IndexValues[documentCategory.NotPublicFieldName])).Any());
         }
-
 
         private async Task<ApiResult> MakeFilterDocumentRequest(Category documentCategory)
         {

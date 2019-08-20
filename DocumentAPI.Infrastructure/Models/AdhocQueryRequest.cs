@@ -4,6 +4,10 @@ namespace DocumentAPI.Infrastructure.Models
 {
     public class FullText
     {
+        public FullText(string value)
+        {
+            Value = value;
+        }
         public int QueryOperator { get; set; } = 0;
         public int SearchType { get; set; } = 0;
         public bool Thesaurus { get; set; } = false;
@@ -12,6 +16,11 @@ namespace DocumentAPI.Infrastructure.Models
 
     public class Index
     {
+        public Index(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
         public string Name { get; set; }
         public string Value { get; set; }
         public bool IsODMAField { get; set; } = false;

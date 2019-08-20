@@ -99,13 +99,18 @@ namespace DocumentAPI.Services
                     query = filteredAttribute.FilterValue1;
                 }
 
-                adhocQueryObject.Indexes.Add(new Index
+                if (!string.IsNullOrEmpty(query))
                 {
-                    Name = filteredAttribute.Name,
-                    Value = query
-                });
+                    if (filteredAttribute.Type.Name == DocumentCategories.FullTextSearchName)
+                    {
+                        adhocQueryObject.FullText = new FullText(query);
+                    }
+                    else
+                    {
+                        adhocQueryObject.Indexes.Add(new Index(filteredAttribute.Name, query));
+                    }
+                }
             }
-
 
             var xTenderDocumentList = await RequestDocuments(category.Name, adhocQueryObject);
 
@@ -123,12 +128,13 @@ namespace DocumentAPI.Services
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 
-            using (var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json")))
-            {
-                var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
-                var filteredResult = ExcludeNonPublicDocuments(result, category);
-                return filteredResult;
-            }
+            var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json"));
+            var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
+            var filteredResult = ExcludeNonPublicDocuments(result, category);
+
+            request.Dispose();
+            return filteredResult;
+
         }
 
         private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
@@ -165,7 +171,7 @@ namespace DocumentAPI.Services
             {
                 if (!string.IsNullOrEmpty(documentCategory.NotPublicFieldName))
                 {
-                    adhocQueryRequest.Indexes.Add(new Index { Name = documentCategory.NotPublicFieldName, Value = "FALSE" });
+                    adhocQueryRequest.Indexes.Add(new Index(documentCategory.NotPublicFieldName, "FALSE"));
 
                     var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest.Indexes);
 
