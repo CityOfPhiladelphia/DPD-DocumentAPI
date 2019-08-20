@@ -24,7 +24,6 @@ namespace DocumentAPI.Tests
                 .UseStartup<Startup>());
 
             _httpClient = server.CreateClient();
-
         }
 
         [Theory]
