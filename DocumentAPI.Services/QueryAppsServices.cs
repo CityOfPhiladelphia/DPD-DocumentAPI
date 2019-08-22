@@ -125,16 +125,17 @@ namespace DocumentAPI.Services
             var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest);
 
             var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{categoryId}");
+
+            _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 
             var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json"));
             var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
-            var filteredResult = ExcludeNonPublicDocuments(result, category);
+            var filteredResult = result.Entries != null ? ExcludeNonPublicDocuments(result, category) : result;
 
             request.Dispose();
             return filteredResult;
-
         }
 
         private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
@@ -176,6 +177,8 @@ namespace DocumentAPI.Services
                     var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest.Indexes);
 
                     var query = new UriBuilder($"{_config.SelectIndexLookupPath}/{documentCategory.Id}");
+
+                    _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
                     _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 

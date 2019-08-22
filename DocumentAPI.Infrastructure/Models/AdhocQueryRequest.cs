@@ -9,7 +9,7 @@ namespace DocumentAPI.Infrastructure.Models
             Value = value;
         }
         public int QueryOperator { get; set; } = 0;
-        public int SearchType { get; set; } = 0;
+        public int SearchType { get; set; } = 2;
         public bool Thesaurus { get; set; } = false;
         public string Value { get; set; }
     }

@@ -37,7 +37,15 @@ namespace DocumentAPI.Controllers
         public async Task<JsonResult> GetFilteredDocumentList([FromBody]Category category)
         {
             var xTenderDocumentList = await _queryAppsServices.FilterQueryAppsResultByParameters(category);
-            return new JsonResult(xTenderDocumentList.ToApiResult());
+
+            if (xTenderDocumentList.Entries != null)
+            {
+                return new JsonResult(xTenderDocumentList.ToApiResult());
+            }
+            else
+            {
+                return new JsonResult(NotFound());
+            }
         }
 
         // GET: api/v1/document-request/get-document/{categoryName}/{documentId}

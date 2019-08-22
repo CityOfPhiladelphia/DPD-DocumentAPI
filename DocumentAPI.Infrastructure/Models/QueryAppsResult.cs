@@ -74,7 +74,7 @@ namespace DocumentAPI.Infrastructure.Models
                 {
                     attribute.SelectedFilterType = new FilterType { Name = selectedFilterType2 };
                     attribute.FilterValue1 = selectedFilterValues2[0];
-                    if (betweenOperators.Contains(selectedFilterType1))
+                    if (betweenOperators.Contains(selectedFilterType2))
                     {
                         attribute.FilterValue2 = selectedFilterValues2[1];
                     }
