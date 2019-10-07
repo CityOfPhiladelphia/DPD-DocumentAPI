@@ -112,19 +112,19 @@ namespace DocumentAPI.Services
                 }
             }
 
-            var xTenderDocumentList = await RequestDocuments(category.Name, adhocQueryObject);
+            var xTenderDocumentList = await RequestDocuments(category.EntityId, category.Id, adhocQueryObject);
 
             return xTenderDocumentList;
         }
 
-        private async Task<QueryAppsResult> RequestDocuments(string categoryName, AdhocQueryRequest adhocQueryRequest)
+        private async Task<QueryAppsResult> RequestDocuments(int entityId, int categoryId, AdhocQueryRequest adhocQueryRequest)
         {
-            var category = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
-            var categoryId = category?.Id ?? 0;
+            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
             var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest);
 
-            var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{categoryId}");
+            var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{category.Id}");
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
@@ -152,31 +152,36 @@ namespace DocumentAPI.Services
             return result;
         }
 
-        public HttpRequestMessage BuildDocumentRequest(string categoryName, int documentId)
+        public HttpRequestMessage BuildDocumentRequest(int entityId, int categoryId, int documentId)
         {
+            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
+
             var requestMessage = new HttpRequestMessage();
-            var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{categoryName}/{documentId}/PDF/{_config.Credentials}");
+            var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{category.Name}/{documentId}/PDF/{_config.Credentials}");
             requestMessage.RequestUri = getFile.Uri;
             requestMessage.Method = HttpMethod.Get;
 
             return requestMessage;
         }
 
-        public async Task<bool> CheckIfDocumentIsPublic(string categoryName, int documentId)
+        public async Task<bool> CheckIfDocumentIsPublic(int entityId, int categoryId, int documentId)
         {
-            var documentCategory = DocumentCategories.Categories.SingleOrDefault(i => i.Name == categoryName);
+            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
+
             var adhocQueryRequest = new AdhocQueryRequest();
             var isPublicDocument = false;
 
-            if (documentCategory != null)
+            if (category != null)
             {
-                if (!string.IsNullOrEmpty(documentCategory.NotPublicFieldName))
+                if (!string.IsNullOrEmpty(category.NotPublicFieldName))
                 {
-                    adhocQueryRequest.Indexes.Add(new Index(documentCategory.NotPublicFieldName, "FALSE"));
+                    adhocQueryRequest.Indexes.Add(new Index(category.NotPublicFieldName, "FALSE"));
 
                     var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest.Indexes);
 
-                    var query = new UriBuilder($"{_config.SelectIndexLookupPath}/{documentCategory.Id}");
+                    var query = new UriBuilder($"{_config.SelectIndexLookupPath}/{category.Id}");
 
                     _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);

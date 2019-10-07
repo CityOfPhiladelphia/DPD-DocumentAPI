@@ -1,10 +1,23 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace DocumentAPI.Infrastructure.Models
 {
+    public class Entity
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public ICollection<Category> Categories { get; set; }
+    }
+
     public class Category
     {
         public int Id { get; set; }
@@ -15,6 +28,8 @@ namespace DocumentAPI.Infrastructure.Models
 
         public ICollection<Attribute> Attributes { get; set; }
         public string NotPublicFieldName { get; set; }
+
+        public int EntityId { get; set; }
 
     }
 
@@ -49,6 +64,8 @@ namespace DocumentAPI.Infrastructure.Models
     {
         static DocumentCategories()
         {
+            Entities = new Collection<Entity>();
+
             var numericType = new Type
             {
                 Name = NumericTypeName,
@@ -99,13 +116,21 @@ namespace DocumentAPI.Infrastructure.Models
                 numericType, dateType, textType, fullTextType
             };
 
-            Categories = new Collection<Category>
+            var historicalCommission = new Entity
+            {
+                Id = 1,
+                Name = "Historical_Commission",
+                DisplayName = "Historical Commission"
+            };
+
+            historicalCommission.Categories = new Collection<Category>
             {
                 new Category
                 {
                     Id = 6,
                     Name= "HISTORICAL_COMM-CARD_CATALOG",
                     DisplayName = "Card Catalog",
+                    EntityId = historicalCommission.Id,
                     Attributes = new Collection<Attribute>
                     {
                         new Attribute
@@ -151,6 +176,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 7,
                     Name= "HISTORICAL_COMM-MEETING_MINUTES",
                     DisplayName = "Meeting Minutes",
+                    EntityId = historicalCommission.Id,
                     NotPublicFieldName = "NOT PUBLIC",
                     Attributes = new Collection<Attribute>
                     {
@@ -203,6 +229,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 4,
                     Name= "HISTORICAL_COMM-PERMITS",
                     DisplayName = "Permits",
+                    EntityId = historicalCommission.Id,
                     Attributes = new Collection<Attribute>
                     {
                         new Attribute
@@ -260,6 +287,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 3,
                     Name= "HISTORICAL_COMM-POLAROIDS",
                     DisplayName = "Polaroids",
+                    EntityId = historicalCommission.Id,
                     Attributes = new Collection<Attribute>
                     {
                         new Attribute
@@ -287,6 +315,7 @@ namespace DocumentAPI.Infrastructure.Models
                     Id = 5,
                     Name= "HISTORICAL_COMM-REGISTRY",
                     DisplayName = "Registry",
+                    EntityId = historicalCommission.Id,
                     Attributes = new Collection<Attribute>
                     {
                         new Attribute
@@ -310,17 +339,20 @@ namespace DocumentAPI.Infrastructure.Models
                     }
                 }
             };
+            Entities.Add(historicalCommission);
 
-            // Add full text search attribute to all Categories
-            foreach (var category in Categories)
+            // Add full text search attribute to all Categories for all Entities
+            foreach (var entity in Entities)
             {
-                category.Attributes.Add(new Attribute
+                foreach (var category in entity.Categories)
                 {
-                    FieldNumber = category.Attributes.Select(a => a.FieldNumber).Max() + 1,
-                    Name = FullTextSearchName,
-                    Type = fullTextType
-                });
-
+                    category.Attributes.Add(new Attribute
+                    {
+                        FieldNumber = category.Attributes.Select(a => a.FieldNumber).Max() + 1,
+                        Name = FullTextSearchName,
+                        Type = fullTextType
+                    });
+                }
             }
         }
 
@@ -358,6 +390,6 @@ namespace DocumentAPI.Infrastructure.Models
 
         public const string FullTextSearchName = "FULL_TEXT";
 
-        public static IEnumerable<Category> Categories { get; }
+        public static ICollection<Entity> Entities { get; }
     }
 }
