@@ -8,6 +8,7 @@ COPY ["DocumentAPI.csproj", "DocumentAPI/"]
 COPY ["DocumentAPI.Services/DocumentAPI.Services.csproj", "DocumentAPI.Services/"]
 COPY ["DocumentAPI.Infrastructure/DocumentAPI.Infrastructure.csproj", "DocumentAPI.Infrastructure/"]
 RUN dotnet restore "DocumentAPI.csproj"
+
 COPY . .
 WORKDIR "/src/DocumentAPI"
 RUN dotnet build "DocumentAPI.csproj" -c Release -o /app
