@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build -f DocumentAPI/Dockerfile --t my-image-name:$(date +%s) .
+      run: docker build -f DocumentAPI/Dockerfile --tag my-image-name:$(date +%s) .
