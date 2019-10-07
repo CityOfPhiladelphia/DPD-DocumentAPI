@@ -4,10 +4,17 @@
         <name>DocumentAPI</name>
     </assembly>
     <members>
-        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocumentCategories">
+        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetEntities">
+            <summary>
+            Get the initial list of Entities. Each entity has a distinct set of Categories.
+            </summary>
+            <returns>Json(List - Entity)</returns>
+        </member>
+        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocumentCategories(System.String)">
             <summary>
             Get the initial list of Document Categories. Each document category is mapped to a Repository in the ApplicationXTender.
             </summary>
+            <param name="entityName">The Name property of the selected Entity</param>
             <returns>Json(List - Category)</returns>
         </member>
         <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetFilteredDocumentList(DocumentAPI.Infrastructure.Models.Category)">
@@ -17,11 +24,12 @@
             <param name="category">A category object</param>
             <returns>Json(QueryAppsResult)</returns>
         </member>
-        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocument(System.String,System.Int32)">
+        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocument(System.String,System.String,System.Int32)">
             <summary>
             Pass in the category name and document id, and receive back the PDF represented by that id from the ApplicationXTender Repository.
             </summary>
-            <param name="categoryName">The Name property of the category object, which represents the name of the repository in ApplicationXTender</param>
+            <param name="entityName">The Name property of the category object's Entity, which represents the Entity (Organization) which the Category belongs to</param>
+            <param name="categoryName">The Name property of the category object, which represents the name of the Category as a repository in ApplicationXTender</param>
             <param name="documentId">The Id that uniquely identifies the document in the ApplicationXTender repository</param>
             <returns>FileStream(PDF)</returns>
         </member>
