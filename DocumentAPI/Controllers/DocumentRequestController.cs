@@ -31,14 +31,14 @@ namespace DocumentAPI.Controllers
 
         // GET: api/v1/document-request/document-categories/{entityName}
         /// <summary>
-        /// Get the initial list of Document Categories. Each document category is mapped to a Repository in the ApplicationXTender.
+        /// Get list of Document Categories available for a given Entity. Each document category is mapped to a Repository in the ApplicationXTender.
         /// </summary>
         /// <param name="entityName">The Name property of the selected Entity</param>
         /// <returns>Json(List - Category)</returns>
         [HttpGet("document-categories/{entityName}")]
         public JsonResult GetDocumentCategories(string entityName)
         {
-            return new JsonResult(DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName));
+            return new JsonResult(DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName).Categories);
         }
 
         // POST: api/v1/document-request/filtered-document-list

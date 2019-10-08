@@ -12,7 +12,7 @@
         </member>
         <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocumentCategories(System.String)">
             <summary>
-            Get the initial list of Document Categories. Each document category is mapped to a Repository in the ApplicationXTender.
+            Get list of Document Categories available for a given Entity. Each document category is mapped to a Repository in the ApplicationXTender.
             </summary>
             <param name="entityName">The Name property of the selected Entity</param>
             <returns>Json(List - Category)</returns>
