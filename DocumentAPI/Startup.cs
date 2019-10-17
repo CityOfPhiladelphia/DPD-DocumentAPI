@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal;
+using System.Net;
 using Newtonsoft.Json;
 
 namespace DocumentAPI
@@ -28,13 +28,33 @@ namespace DocumentAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var httpClient = new HttpClient();
+            var httpClientHandler = new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            var httpClient = new HttpClient(httpClientHandler);
 
             services.AddSingleton(httpClient);
 
 
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
+
+            services.AddCors(options =>
+                 {
+                     options.AddPolicy("AllowAll",
+                         builder =>
+                         {
+                             builder
+                                 .AllowAnyOrigin()
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod()
+                                 .AllowCredentials()
+                                 .SetIsOriginAllowed((host) => true);
+                         });
+                 });
+
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -49,6 +69,8 @@ namespace DocumentAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors("AllowAll");
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
