@@ -1,7 +1,5 @@
 FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
 FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
@@ -21,4 +19,9 @@ RUN dotnet publish "DocumentAPI.csproj" -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+
+ENV ASPNETCORE_URLS http://+:443
+EXPOSE 80
+EXPOSE 443
+
 ENTRYPOINT ["dotnet", "DocumentAPI.dll"]
