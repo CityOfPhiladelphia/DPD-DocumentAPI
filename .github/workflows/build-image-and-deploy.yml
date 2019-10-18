@@ -20,7 +20,7 @@ jobs:
         REPOSITORY_URL: 979207732266.dkr.ecr.us-east-2.amazonaws.com/dpd-document-api
       run: |
         $(aws ecr get-login --no-include-email --region us-east-1)
-        docker tag api_api:latest $REPOSITORY_URL:$(date +%s)
+        docker tag dpd-document-api:latest $REPOSITORY_URL:$(date +%s)
         docker push $REPOSITORY_URL:$(date +%s)
     - name: Deploy to Fargate
       env:
