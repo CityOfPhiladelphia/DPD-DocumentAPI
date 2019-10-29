@@ -5,6 +5,7 @@ using Xunit;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 
 namespace DocumentAPI.Tests
 {
@@ -19,6 +20,30 @@ namespace DocumentAPI.Tests
                 .UseEnvironment("Development")
                 .UseStartup<Startup>());
             _httpClient = server.CreateClient();
+        }
+
+        [Theory]
+        [InlineData("GET")]
+        [InlineData("POST")]
+        public async Task GetEntities(string method)
+        {
+            // Arrange
+            var request = new HttpRequestMessage(new HttpMethod(method), $"/api/v1/document-request/entities");
+
+            // Act
+            using (var response = await _httpClient.SendAsync(request))
+            {
+
+                // Assert
+                if (response.IsSuccessStatusCode)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+                else
+                {
+                    Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+                }
+            }
         }
 
         [Theory]
@@ -37,6 +62,30 @@ namespace DocumentAPI.Tests
                 if (response.IsSuccessStatusCode)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+                else
+                {
+                    Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-MEETING_MINUTES")]
+        public async Task GetAllDocumentsAsync(string method, string entityName, string categoryName)
+        {
+            // Arrange
+            var request = new HttpRequestMessage(new HttpMethod(method), $"/api/v1/document-request/document-list/{entityName}/{categoryName}");
+
+            // Act
+            using (var response = await _httpClient.SendAsync(request))
+            {
+
+                // Assert
+                if (response.IsSuccessStatusCode)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.NotEqual(HttpStatusCode.NotFound, response.StatusCode);
                 }
                 else
                 {

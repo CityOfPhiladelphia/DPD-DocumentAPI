@@ -41,6 +41,29 @@ namespace DocumentAPI.Controllers
             return new JsonResult(DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName).Categories);
         }
 
+        // GET: api/v1/document-request/document-list/{entityName}/{categoryName}
+        /// <summary>
+        /// Pass the Entity Name and Category Name to retrieve a full list of documents and their attributes for that Category.
+        /// </summary>
+        /// <param name="entityName">The Name property of the selected Entity</param>
+        /// <param name="categoryName">The Name property of the selected Category</param>
+        /// <returns>Json(QueryAppsResult)</returns>
+        [HttpGet("document-list/{entityName}/{categoryName}")]
+        public async Task<JsonResult> GetDocumentList(string entityName, string categoryName)
+        {
+            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName);
+            var category = entity?.Categories.SingleOrDefault(i => i.Name == categoryName);
+            if (category != null)
+            {
+                var queryAppsResult = await _queryAppsServices.GetAllDocuments(entity.Id, category.Id);
+                return new JsonResult(queryAppsResult.ToApiResult());
+            }
+            else
+            {
+                return new JsonResult(NotFound());
+            }
+        }
+
         // POST: api/v1/document-request/filtered-document-list
         /// <summary>
         /// Pass a Category object with filters applied in the body of the request to retrieve a filtered list of documents and their attributes.

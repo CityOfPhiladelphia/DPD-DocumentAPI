@@ -8,6 +8,7 @@ namespace DocumentAPI.Infrastructure.Interfaces
     public interface IQueryAppsServices
     {
         Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category);
+        Task<QueryAppsResult> GetAllDocuments(int entityId, int categoryId);
         HttpRequestMessage BuildDocumentRequest(int entityId, int categoryId, int documentId);
         Task<bool> CheckIfDocumentIsPublic(int entityId, int categoryId, int documentId);
         Task<Stream> GetResponse(HttpRequestMessage requestMessage);
