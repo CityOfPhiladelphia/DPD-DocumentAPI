@@ -28,7 +28,7 @@ namespace DocumentAPI.Infrastructure.Models
         public bool Displayable { get; set; } = true;
     }
 
-    public class AdhocQueryRequest
+    public class QueryRequestObject
     {
         public ICollection<Index> Indexes { get; set; } = new List<Index>();
         public FullText FullText { get; set; } = null;

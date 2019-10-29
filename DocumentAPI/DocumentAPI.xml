@@ -17,6 +17,14 @@
             <param name="entityName">The Name property of the selected Entity</param>
             <returns>Json(List - Category)</returns>
         </member>
+        <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetDocumentList(System.String,System.String)">
+            <summary>
+            Pass the Entity Name and Category Name to retrieve a full list of documents and their attributes for that Category.
+            </summary>
+            <param name="entityName">The Name property of the selected Entity</param>
+            <param name="categoryName">The Name property of the selected Category</param>
+            <returns>Json(QueryAppsResult)</returns>
+        </member>
         <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetFilteredDocumentList(DocumentAPI.Infrastructure.Models.Category)">
             <summary>
             Pass a Category object with filters applied in the body of the request to retrieve a filtered list of documents and their attributes.

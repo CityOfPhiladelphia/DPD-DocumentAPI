@@ -26,7 +26,7 @@ namespace DocumentAPI.Services
         public async Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category)
         {
             var filteredAttributes = category.Attributes.Where(i => i.SelectedFilterType != null);
-            var adhocQueryObject = new AdhocQueryRequest();
+            var adhocQueryObject = new QueryRequestObject();
 
             foreach (var filteredAttribute in filteredAttributes)
             {
@@ -112,30 +112,40 @@ namespace DocumentAPI.Services
                 }
             }
 
-            var xTenderDocumentList = await RequestDocuments(category.EntityId, category.Id, adhocQueryObject);
+            var xTenderDocumentList = await RequestDocuments(category.EntityId, category.Id, adhocQueryObject, true);
 
             return xTenderDocumentList;
         }
 
-        private async Task<QueryAppsResult> RequestDocuments(int entityId, int categoryId, AdhocQueryRequest adhocQueryRequest)
+        public async Task<QueryAppsResult> GetAllDocuments(int entityId, int categoryId)
+        {
+            return await RequestDocuments(entityId, categoryId);
+        }
+
+        private async Task<QueryAppsResult> RequestDocuments(int entityId, int categoryId, QueryRequestObject queryRequest = null, bool isAdHocQueryRequest = false)
         {
             var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
-            var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest);
-
-            var query = new UriBuilder($"{_config.AdHocQueryResultsPath}/{category.Id}");
+            var requestPath = isAdHocQueryRequest ? _config.AdHocQueryResultsPath : _config.SelectIndexLookupPath;
+            var query = new UriBuilder($"{requestPath}/{category.Id}");
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.emc.ax+json"));
 
-            var request = await _httpClient.PostAsync(query.Uri, new StringContent(adhocQueryJson, Encoding.UTF8, "application/vnd.emc.ax+json"));
-            var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
-            var filteredResult = result.Entries != null ? ExcludeNonPublicDocuments(result, category) : result;
+            var queryJson = JsonConvert.SerializeObject(new string[0]);
 
-            request.Dispose();
-            return filteredResult;
+            if (isAdHocQueryRequest)
+            {
+                queryJson = JsonConvert.SerializeObject(queryRequest);
+            }
+            using (var request = await _httpClient.PostAsync(query.Uri, new StringContent(queryJson, Encoding.UTF8, "application/vnd.emc.ax+json")))
+            {
+                var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
+                var filteredResult = result.Entries != null ? ExcludeNonPublicDocuments(result, category) : result;
+                return filteredResult;
+            }
         }
 
         private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
@@ -170,7 +180,7 @@ namespace DocumentAPI.Services
             var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
-            var adhocQueryRequest = new AdhocQueryRequest();
+            var adhocQueryRequest = new QueryRequestObject();
             var isPublicDocument = false;
 
             if (category != null)
