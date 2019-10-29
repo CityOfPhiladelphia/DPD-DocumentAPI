@@ -208,6 +208,7 @@ namespace DocumentAPI.Services
 
         public async Task<Stream> GetResponse(HttpRequestMessage requestMessage)
         {
+            _httpClient.DefaultRequestHeaders.Clear();
             var response = await _httpClient.SendAsync(requestMessage);
             return await response.Content.ReadAsStreamAsync();
         }
