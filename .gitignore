@@ -31,6 +31,8 @@ bld/
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
+# vs code
+.vscode/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
@@ -340,3 +342,11 @@ ASALocalRun/
 healthchecksdb
 
 /DocumentAPI.Infrastructure/config.json
+
+# Terraform
+# Compiled files
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+# Module directory
+.terraform/

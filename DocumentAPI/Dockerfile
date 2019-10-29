@@ -20,7 +20,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
 
-ENV ASPNETCORE_URLS http://+:443
 EXPOSE 80
 EXPOSE 443
 
