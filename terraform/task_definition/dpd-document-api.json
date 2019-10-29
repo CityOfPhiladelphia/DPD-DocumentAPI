@@ -1,0 +1,23 @@
+[
+  {
+    "name": "${project}-${environment}-${infra}",
+    "image": "102658671810.dkr.ecr.us-east-1.amazonaws.com/vendor-payments-api:${environment}-latest",
+    "memoryReservation": 256,
+    "essential": true,
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ],
+    "logConfiguration": {	
+      "logDriver": "awslogs",	
+      "options": {	
+          "awslogs-group": "${log_group_name}",	
+          "awslogs-region": "${log_group_region}",
+          "awslogs-stream-prefix": "api"
+      }	
+    }
+  }
+]
