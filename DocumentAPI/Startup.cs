@@ -87,7 +87,6 @@ namespace DocumentAPI
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             if (env.IsProduction())
             {
                 app.UseExceptionHandler(config =>
