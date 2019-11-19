@@ -182,43 +182,43 @@ namespace DocumentAPI.Infrastructure.Models
                     {
                         new Attribute
                         {
-                            FieldNumber = 1,
+                            FieldNumber = 5,
                             Name = "DOCUMENT NAME",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 2,
+                            FieldNumber = 1,
                             Name = "DOCUMENT DATE",
                             Type = dateType
                         },
                         new Attribute
                         {
-                            FieldNumber = 3,
+                            FieldNumber = 7,
                             Name = "DOCUMENT TYPE",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 4,
+                            FieldNumber = 2,
                             Name = "MEETING NUMBER",
                             Type = numericType
                         },
                         new Attribute
                         {
-                            FieldNumber = 5,
+                            FieldNumber = 9,
                             Name = "BODY",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 6,
+                            FieldNumber = 11,
                             Name = "COMMENT",
                             Type = textType
                         },
                         new Attribute
                         {
-                            FieldNumber = 7,
+                            FieldNumber = 3,
                             Name = "ARCHIVE DATE",
                             Type = dateType
                         }
