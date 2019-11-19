@@ -9,6 +9,9 @@ using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Infrastructure.Models;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
+using System.Data;
+using System.Collections.Generic;
 
 namespace DocumentAPI.Services
 {
@@ -119,7 +122,14 @@ namespace DocumentAPI.Services
 
         public async Task<QueryAppsResult> GetAllDocuments(int entityId, int categoryId)
         {
-            return await RequestDocuments(entityId, categoryId);
+            var documentList = RequestDocuments(entityId, categoryId);
+            var docsWithPageCounts = RequestDocumentsFromOracle(entityId, categoryId);
+
+            foreach (var document in (await documentList).Entries)
+            {
+                document.PageCount = (await docsWithPageCounts).Entries.SingleOrDefault(i => i.Id == document.Id).PageCount;
+            }
+            return await documentList;
         }
 
         private async Task<QueryAppsResult> RequestDocuments(int entityId, int categoryId, QueryRequestObject queryRequest = null, bool isAdHocQueryRequest = false)
@@ -148,6 +158,54 @@ namespace DocumentAPI.Services
             }
         }
 
+        private async Task<QueryAppsResult> RequestDocumentsFromOracle(int entityId, int categoryId)
+        {
+            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
+            var result = new QueryAppsResult();
+            var oracleConnectionString = "User Id=histuser;Password=historical;Data Source=it04pprdorc01.city.phila.local:1521/IMAGP";
+            using (var axOracleDb = new OracleConnection(oracleConnectionString))
+            {
+                using (OracleCommand cmd = axOracleDb.CreateCommand())
+                {
+                    try
+                    {
+                        await axOracleDb.OpenAsync();
+                        var resultDataSet = new DataSet();
+                        cmd.CommandText = $"select DOCID, PAGES from historical where APPID = {category.Id}";
+
+                        using (var dataAdapter = new OracleDataAdapter())
+                        {
+                            dataAdapter.SelectCommand = cmd;
+                            dataAdapter.Fill(resultDataSet);
+                        }
+
+                        var table = resultDataSet.Tables[0];
+
+                        if (table != null)
+                        {
+                            foreach (DataRow row in table.Rows)
+                            {
+
+                                var entry = new Entry
+                                {
+                                    Id = int.TryParse(row.ItemArray.First().ToString(), out var id) ? id : 0,
+                                    PageCount = int.TryParse(row.ItemArray.Last().ToString(), out var pageCount) ? pageCount : 0
+                                };
+                                result.Entries.Add(entry);
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+            return result;
+        }
+
         private QueryAppsResult ExcludeNonPublicDocuments(QueryAppsResult result, Category category)
         {
             var columnIndex = Array.FindIndex(result.Columns, i => i == category.NotPublicFieldName);
@@ -157,7 +215,7 @@ namespace DocumentAPI.Services
                 result.Entries = result.Entries.Where(i =>
                     // parse and filter out entries where Not Public equals true
                     !(bool.Parse(i.IndexValues[columnIndex]))
-                );
+                ).ToList();
             };
             return result;
         }

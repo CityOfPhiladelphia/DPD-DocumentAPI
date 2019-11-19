@@ -7,7 +7,7 @@ namespace DocumentAPI.Infrastructure.Models
     {
         public string[] Columns { get; set; }
 
-        public IEnumerable<Entry> Entries { get; set; }
+        public ICollection<Entry> Entries { get; set; } = new Collection<Entry>();
     }
 
     public class Entry
