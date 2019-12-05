@@ -34,7 +34,7 @@ resource "aws_security_group" "public" {
   }
 }
 
-# Vendor Payments
+# Document API
 # allow access to the front end servers from the load balancer
 resource "aws_security_group" "dpd_document_ecs" {
   name        = "${var.project}-${var.environment}-ecs"

@@ -19,11 +19,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_attachment3" {
     policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_role_attachment4" {
-    role       = "${aws_iam_role.ecs_task_role.name}"
-    policy_arn = "arn:aws:iam::102658671810:policy/AppDev_CF_Secrets"
-}
-
 data "aws_iam_policy_document" "ecs_task_policy" {
     statement {
         actions = ["sts:AssumeRole"]
