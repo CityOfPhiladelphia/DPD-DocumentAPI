@@ -350,3 +350,4 @@ healthchecksdb
 .terraform.tfstate.lock.info
 # Module directory
 .terraform/
+variables-secret.tf

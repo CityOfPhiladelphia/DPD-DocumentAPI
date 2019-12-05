@@ -8,6 +8,38 @@
       {
         "name": "ASPNETCORE_ENVIRONMENT",
         "value": "${environment == "prod" ? "Production" : "Test"}"
+      },
+      {
+        "name": "Credentials",
+        "value": "${Credentials}"
+      },
+      {
+        "name": "RequestBasePath",
+        "value": "${RequestBasePath}"
+      },
+      {
+        "name": "AdHocQueryResultsPath",
+        "value": "${AdHocQueryResultsPath}"
+      },
+      {
+        "name": "SelectIndexLookupPath",
+        "value": "${SelectIndexLookupPath}"
+      },
+      {
+        "name": "QueryAppsPath",
+        "value": "${QueryAppsPath}"
+      },
+      {
+        "name": "RetrieveDocumentPath",
+        "value": "${RetrieveDocumentPath}"
+      },
+      {
+        "name": "ExportDocumentPath",
+        "value": "${ExportDocumentPath}"
+      },
+      {
+        "name": "OracleConnectionString",
+        "value": "${OracleConnectionString}"
       }
     ],
     "portMappings": [

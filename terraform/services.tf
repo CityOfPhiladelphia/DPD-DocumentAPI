@@ -9,11 +9,19 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 data "template_file" "dpd_document_api" {
   template = "${file("task_definition/dpd-document-api.json")}"
   vars = {
-    project          = "${var.project}"
-    environment      = "${var.environment}"
-    infra            = "api"
-    log_group_name   = "${aws_cloudwatch_log_group.dpd_document_api_log_group.name}"
-    log_group_region = "${var.aws_region}"
+    project                = "${var.project}"
+    environment            = "${var.environment}"
+    infra                  = "api"
+    log_group_name         = "${aws_cloudwatch_log_group.dpd_document_api_log_group.name}"
+    log_group_region       = "${var.aws_region}"
+    Credentials            = "${var.Credentials}"
+    RequestBasePath        = "${var.RequestBasePath}"
+    AdHocQueryResultsPath  = "${var.AdHocQueryResultsPath}"
+    SelectIndexLookupPath  = "${var.SelectIndexLookupPath}"
+    QueryAppsPath          = "${var.QueryAppsPath}"
+    RetrieveDocumentPath   = "${var.RetrieveDocumentPath}"
+    ExportDocumentPath     = "${var.ExportDocumentPath}"
+    OracleConnectionString = "${var.OracleConnectionString}"
   }
 }
 
