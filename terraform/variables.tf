@@ -1,8 +1,3 @@
-terraform {
-  backend "atlas" {
-  }
-}
-
 provider "aws" {
   region = "${var.aws_region}"
 }
@@ -16,7 +11,7 @@ variable "department" {
 }
 
 variable "environment" {
-  default = "test"
+  default = "prod"
 }
 
 variable "aws_region" {
@@ -24,47 +19,47 @@ variable "aws_region" {
 }
 
 variable "vpc_id" {
-  default = "vpc-b71df3cc"
+  default = "vpc-0b5d7aefdcf5d2a7c"
 }
 
 variable "priv_subnet1" {
-  default = "subnet-04fcc79737372193b"
+  default = "subnet-00c0eb1522ceef2eb"
 }
 
 variable "priv_subnet2" {
-  default = "subnet-017066bae8ead689a"
+  default = "subnet-05479a00b2c80c001"
 }
 
 variable "priv_subnet3" {
-  default = "subnet-0167b96a0dd79cc41"
+  default = "subnet-0d457b51ad472d882"
 }
 
 variable "priv_subnet4" {
-  default = "subnet-0435129fa7e7b0e70"
+  default = "subnet-007593c9b70024d7a"
 }
 
 variable "pub_subnet1" {
-  default = "subnet-0ffee11e2c8c68032"
+  default = "subnet-01b6d0f9d9f316d2b"
 }
 
 variable "pub_subnet2" {
-  default = "subnet-0483b33f74e96bb0c"
+  default = "subnet-07cbe86f23bb1004d"
 }
 
 variable "pub_subnet3" {
-  default = "subnet-0aec0cacb2ea97e9d"
+  default = "subnet-0ba3d76c195fe3c8c"
 }
 
 variable "pub_subnet4" {
-  default = "subnet-004b86d7a79e2e030"
+  default = "subnet-0da21664b0a623486"
 }
 
 variable "enviro_name" {
-  default = "Test"
+  default = "Prod"
 }
 
 variable "certificate_arn" {
-  default = "arn:aws:acm:us-east-1:102658671810:certificate/d8b8e135-aa30-4fda-b963-2fffc8e48d6d"
+  default = "arn:aws:acm:us-east-1:922311303087:certificate/e67f832a-9203-4d1b-a769-3566e4c9db06"
 }
 
 variable "pipe_owner" {
@@ -94,11 +89,6 @@ variable "max_task_count" {
 variable "dns_zone_id_api" {
   default = ""
 }
-
-variable "dns_zone_id_ui" {
-  default = ""
-}
-
 
 variable "cf_aliases" {
   default =""

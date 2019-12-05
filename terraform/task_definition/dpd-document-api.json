@@ -1,9 +1,15 @@
 [
   {
     "name": "${project}-${environment}-${infra}",
-    "image": "102658671810.dkr.ecr.us-east-1.amazonaws.com/vendor-payments-api:${environment}-latest",
+    "image": "922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api:latest",
     "memoryReservation": 256,
     "essential": true,
+    "environment": [
+      {
+        "name": "ASPNETCORE_ENVIRONMENT",
+        "value": "${environment == "prod" ? "Production" : "Test"}"
+      }
+    ],
     "portMappings": [
       {
         "protocol": "tcp",
@@ -11,13 +17,13 @@
         "hostPort": 80
       }
     ],
-    "logConfiguration": {	
-      "logDriver": "awslogs",	
-      "options": {	
-          "awslogs-group": "${log_group_name}",	
-          "awslogs-region": "${log_group_region}",
-          "awslogs-stream-prefix": "api"
-      }	
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group_name}",
+        "awslogs-region": "${log_group_region}",
+        "awslogs-stream-prefix": "api"
+      }
     }
   }
 ]
