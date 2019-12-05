@@ -163,7 +163,7 @@ namespace DocumentAPI.Services
             var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             var result = new QueryAppsResult();
-            var oracleConnectionString = "User Id=histuser;Password=historical;Data Source=it04pprdorc01.city.phila.local:1521/IMAGP";
+            var oracleConnectionString = _config.OracleConnectionString;
             using (var axOracleDb = new OracleConnection(oracleConnectionString))
             {
                 using (OracleCommand cmd = axOracleDb.CreateCommand())

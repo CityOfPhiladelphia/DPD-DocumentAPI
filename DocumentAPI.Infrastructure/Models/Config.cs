@@ -9,10 +9,12 @@ namespace DocumentAPI.Infrastructure.Models
         public string RequestBasePath { get; set; }
 
         public string AdHocQueryResultsPath { get; set; }
-        
+
         public string SelectIndexLookupPath { get; set; }
 
         public string ExportDocumentPath { get; set; }
+
+        public string OracleConnectionString { get; set; }
     }
 
     public static class ConfigExtensions
@@ -25,7 +27,8 @@ namespace DocumentAPI.Infrastructure.Models
                 RequestBasePath = config["RequestBasePath"],
                 AdHocQueryResultsPath = config["AdHocQueryResultsPath"],
                 SelectIndexLookupPath = config["SelectIndexLookupPath"],
-                ExportDocumentPath = config["ExportDocumentPath"]
+                ExportDocumentPath = config["ExportDocumentPath"],
+                OracleConnectionString = config["OracleConnectionString"]
             };
         }
     }
