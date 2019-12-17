@@ -13,17 +13,20 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace DocumentAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
-            Configuration = configuration;
+            _configuration = configuration;
+            _logger = logger;
         }
 
-        public IConfiguration Configuration { get; }
+        private ILogger _logger;
+        public IConfiguration _configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -99,10 +102,11 @@ namespace DocumentAPI
                         var error = context.Features.Get<IExceptionHandlerFeature>();
                         if (error != null)
                         {
-                            var message = "Unexpected error";
-                            var description = "Unexpected error";
+                            var ex = error?.Error;
+                            var message = ex.Message;
+                            var description = ex;
 
-                            var ex = error.Error;
+                            _logger.LogError("An Error Has Occurred", ex);
 
                             await context.Response.WriteAsync(JsonConvert.SerializeObject(new
                             {
