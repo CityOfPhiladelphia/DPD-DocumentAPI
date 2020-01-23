@@ -22,7 +22,7 @@ namespace DocumentAPI.Services
         private readonly Config _config;
         private ILogger _logger;
 
-        public QueryAppsServices(HttpClient httpClient, IConfiguration config, ILogger logger)
+        public QueryAppsServices(HttpClient httpClient, IConfiguration config, ILogger<QueryAppsServices> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
