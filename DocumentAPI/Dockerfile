@@ -1,8 +1,13 @@
+
 FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
 
+ENV TZ=America/New_York
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
+
 
 COPY ["DocumentAPI/DocumentAPI.csproj", "DocumentAPI/"]
 COPY ["DocumentAPI.Services/DocumentAPI.Services.csproj", "DocumentAPI.Services/"]
