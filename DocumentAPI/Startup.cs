@@ -40,6 +40,12 @@ namespace DocumentAPI
 
             services.AddSingleton(httpClient);
 
+            services.AddLogging(l =>
+            {
+                l.AddAWSProvider(_configuration.GetAWSLoggingConfigSection());
+                l.SetMinimumLevel(LogLevel.Debug);
+            });
+
 
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
