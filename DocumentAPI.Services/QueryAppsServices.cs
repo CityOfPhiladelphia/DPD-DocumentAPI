@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace DocumentAPI.Services
 {
@@ -19,10 +20,12 @@ namespace DocumentAPI.Services
     {
         private readonly HttpClient _httpClient;
         private readonly Config _config;
+        private ILogger _logger;
 
-        public QueryAppsServices(HttpClient httpClient, IConfiguration config)
+        public QueryAppsServices(HttpClient httpClient, IConfiguration config, ILogger logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
             _config = config.Load();
         }
 
@@ -199,7 +202,7 @@ namespace DocumentAPI.Services
                     }
                     catch (Exception ex)
                     {
-
+                        _logger.LogError(ex.Message);
                     }
                 }
             }

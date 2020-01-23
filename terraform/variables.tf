@@ -19,39 +19,39 @@ variable "aws_region" {
 }
 
 variable "vpc_id" {
-  default = "vpc-0b5d7aefdcf5d2a7c"
+  default = "vpc-0200766a34fd6eb89"
 }
 
 variable "priv_subnet1" {
-  default = "subnet-00c0eb1522ceef2eb"
+  default = "subnet-0cfa5c7ad7906503f"
 }
 
 variable "priv_subnet2" {
-  default = "subnet-05479a00b2c80c001"
+  default = "subnet-055665485afa3f3b9"
 }
 
 variable "priv_subnet3" {
-  default = "subnet-0d457b51ad472d882"
+  default = "subnet-03de5e74c20ff1dad"
 }
 
 variable "priv_subnet4" {
-  default = "subnet-007593c9b70024d7a"
+  default = "subnet-0748ba7c561d484f3"
 }
 
 variable "pub_subnet1" {
-  default = "subnet-01b6d0f9d9f316d2b"
+  default = "subnet-0399cdb2d462450ef"
 }
 
 variable "pub_subnet2" {
-  default = "subnet-07cbe86f23bb1004d"
+  default = "subnet-08ed747a342323e3f"
 }
 
 variable "pub_subnet3" {
-  default = "subnet-0ba3d76c195fe3c8c"
+  default = "subnet-070ef19ef7b257410"
 }
 
 variable "pub_subnet4" {
-  default = "subnet-0da21664b0a623486"
+  default = "subnet-0c1ff8fe33d79f9d7"
 }
 
 variable "enviro_name" {
