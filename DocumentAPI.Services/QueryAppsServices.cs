@@ -127,7 +127,7 @@ namespace DocumentAPI.Services
 
             foreach (var document in (await documentList).Entries)
             {
-                document.PageCount = (await docsWithPageCounts).Entries.SingleOrDefault(i => i.Id == document.Id).PageCount;
+                document.PageCount = (await docsWithPageCounts)?.Entries.SingleOrDefault(i => i.Id == document.Id)?.PageCount ?? 0;
             }
             return await documentList;
         }
