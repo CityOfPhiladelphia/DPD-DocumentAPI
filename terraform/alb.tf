@@ -5,7 +5,7 @@ resource "aws_lb" "dpd_document_public" {
   internal           = false
   load_balancer_type = "application"
   idle_timeout       = 600
-  security_groups    = ["${aws_security_group.public.id}"]
+  security_groups    = ["${aws_security_group.public.id}", "${aws_security_group.dpd_document_applicationXTender.id}"]
   subnets            = ["${var.pub_subnet1}", "${var.pub_subnet2}", "${var.pub_subnet3}", "${var.pub_subnet4}"]
 
   tags = {
@@ -31,7 +31,7 @@ resource "aws_lb_target_group" "dpd_front_end" {
     unhealthy_threshold = 2
     protocol            = "HTTP"
     timeout             = 60
-    path                = "/"
+    path                = "/swagger/index.html"
     interval            = 65
   }
 }
