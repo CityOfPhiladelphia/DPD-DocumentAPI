@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Infrastructure.Models;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace DocumentAPI.Controllers
 {
@@ -11,10 +12,12 @@ namespace DocumentAPI.Controllers
     public class DocumentRequestController : ControllerBase
     {
         private readonly IQueryAppsServices _queryAppsServices;
+        private ILogger _logger;
 
-        public DocumentRequestController(IQueryAppsServices queryAppsServices)
+        public DocumentRequestController(IQueryAppsServices queryAppsServices, ILogger<DocumentRequestController> logger)
         {
             _queryAppsServices = queryAppsServices;
+            _logger = logger;
         }
 
 
