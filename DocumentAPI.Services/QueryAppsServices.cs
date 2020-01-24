@@ -229,9 +229,11 @@ namespace DocumentAPI.Services
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
             var requestMessage = new HttpRequestMessage();
-            var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{category.Name}/{documentId}/PDF/{_config.Credentials}");
+            var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{category.Name}/{documentId}/{_config.Credentials}");
             requestMessage.RequestUri = getFile.Uri;
             requestMessage.Method = HttpMethod.Get;
+            
+            _logger.LogInformation($"Request built to get document from {requestMessage.RequestUri}");
 
             return requestMessage;
         }
