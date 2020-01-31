@@ -6,11 +6,11 @@ resource "aws_cloudwatch_log_group" "dpd_document_api_log_group" {
   retention_in_days = 30
 
   tags = {
-    Name = "dpd-document-api-log-group"
+    Name = "${var.project}-${var.environment}-api-log-group"
   }
 }
 
 resource "aws_cloudwatch_log_stream" "dpd_document_api_log_stream" {
-  name           = "dpd-document-api-log-stream"
+  name           = "${var.project}-${var.environment}-api-log-stream"
   log_group_name = "${aws_cloudwatch_log_group.dpd_document_api_log_group.name}"
 }

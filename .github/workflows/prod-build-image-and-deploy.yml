@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build:
+    runs-on: ubuntu-16.04
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the Docker image
+        run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:latest .
+      - name: Push Image to ECR (Prod)
+        env:
+          ASPNETCORE_ENVIRONMENT: 'Production'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
+        run: |
+          $(aws ecr get-login --no-include-email --region us-east-1)
+          docker tag dpd-document-api:latest $REPOSITORY_URL:latest
+          docker push $REPOSITORY_URL:latest
+      - name: Deploy to Fargate
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
+        run: |
+          aws ecs update-service --cluster dpd-document-api-prod-cluster --service dpd-document-api-prod-service --force-new-deployment --region us-east-1
