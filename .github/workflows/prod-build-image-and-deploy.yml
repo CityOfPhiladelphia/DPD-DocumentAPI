@@ -15,7 +15,7 @@ jobs:
         run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:latest .
       - name: Push Image to ECR (Prod)
         env:
-          ASPNETCORE_ENVIRONMENT: 'prod'
+          ASPNETCORE_ENVIRONMENT: 'Production'
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
