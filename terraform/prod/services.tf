@@ -26,7 +26,7 @@ data "template_file" "dpd_document_api" {
 }
 
 resource "aws_ecs_task_definition" "dpd_document_api_task" {
-  family                   = "dpd-document-api-task"
+  family                   = "${var.project}-${var.environment}-task"
   execution_role_arn       = "${aws_iam_role.ecs_task_role.arn}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "dpd_document_api_task" {
 }
 
 resource "aws_ecs_service" "main" {
-  name            = "document-api-service"
+  name            = "${var.project}-${var.environment}-service"
   cluster         = "${aws_ecs_cluster.ecs_cluster.id}"
   task_definition = "${aws_ecs_task_definition.dpd_document_api_task.arn}"
   desired_count   = 2

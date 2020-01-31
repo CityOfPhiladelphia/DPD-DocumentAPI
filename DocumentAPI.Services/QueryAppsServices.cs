@@ -44,16 +44,16 @@ namespace DocumentAPI.Services
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
-                        case DocumentCategories.NumericEqualsOperator:
+                        case DocumentCategories.TextEqualsOperator:
                             query = $"{stringFilter1}";
                             break;
-                        case DocumentCategories.NumericGreaterThanOperator:
+                        case DocumentCategories.TextGreaterThanOperator:
                             query = $"Expression: > {stringFilter1}";
                             break;
-                        case DocumentCategories.NumericLessThanOperator:
+                        case DocumentCategories.TextLessThanOperator:
                             query = $"Expression: < {stringFilter1}";
                             break;
-                        case DocumentCategories.NumericBetweenOperator:
+                        case DocumentCategories.TextBetweenOperator:
                             query = $"Expression: ['{stringFilter1}','{stringFilter2}']";
                             break;
                     }
