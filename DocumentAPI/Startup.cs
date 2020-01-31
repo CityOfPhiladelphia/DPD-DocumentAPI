@@ -19,18 +19,28 @@ namespace DocumentAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, ILogger<Startup> logger)
+        public Startup(IConfiguration configuration, ILogger<Startup> logger, IHostingEnvironment env)
         {
             _configuration = configuration;
             _logger = logger;
+            _env = env;
         }
 
         private ILogger _logger;
         public IConfiguration _configuration { get; }
 
+        private IHostingEnvironment _env;
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(_env.ContentRootPath)
+                .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            configBuilder.Build();
+
             var httpClientHandler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
@@ -69,7 +79,7 @@ namespace DocumentAPI
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "Document API", Version = "v1.0" });
+                c.SwaggerDoc("v1", new Info { Title = $"Document API - {_env.EnvironmentName}", Version = "v1.0" });
                 var xmlFile = Path.ChangeExtension(typeof(Startup).Assembly.Location, ".xml");
                 c.IncludeXmlComments(xmlFile);
             });
