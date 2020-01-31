@@ -20,7 +20,7 @@ resource "aws_lb_target_group" "dpd_front_end" {
   lifecycle {
     create_before_destroy = true
   }
-  name = "dpd-document-target-group"
+  name = "${var.project}-${var.environment}-tg"
 
   port        = 80
   protocol    = "HTTP"
@@ -66,17 +66,3 @@ resource "aws_alb_listener" "dpd_document_public2" {
     type             = "forward"
   }
 }
-
-# DNS alias record
-# resource "aws_route53_record" "dpd_document_api" {
-#   zone_id = "${var.dns_zone_id_api}"
-#   name    = ""
-#   type    = "A"
-
-#   alias {
-#     name                   = "${aws_lb.dpd_document_public.dns_name}"
-#     zone_id                = "${aws_lb.dpd_document_public.zone_id}"
-#     evaluate_target_health = false
-#   }
-# }
-

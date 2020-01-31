@@ -1,0 +1,61 @@
+[
+  {
+    "name": "${project}-${environment}-${infra}",
+    "image": "922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api:test-latest",
+    "memoryReservation": 256,
+    "essential": true,
+    "environment": [
+      {
+        "name": "ASPNETCORE_ENVIRONMENT",
+        "value": "${environment == "prod" ? "Production" : "Test"}"
+      },
+      {
+        "name": "Credentials",
+        "value": "${Credentials}"
+      },
+      {
+        "name": "RequestBasePath",
+        "value": "${RequestBasePath}"
+      },
+      {
+        "name": "AdHocQueryResultsPath",
+        "value": "${AdHocQueryResultsPath}"
+      },
+      {
+        "name": "SelectIndexLookupPath",
+        "value": "${SelectIndexLookupPath}"
+      },
+      {
+        "name": "QueryAppsPath",
+        "value": "${QueryAppsPath}"
+      },
+      {
+        "name": "RetrieveDocumentPath",
+        "value": "${RetrieveDocumentPath}"
+      },
+      {
+        "name": "ExportDocumentPath",
+        "value": "${ExportDocumentPath}"
+      },
+      {
+        "name": "OracleConnectionString",
+        "value": "${OracleConnectionString}"
+      }
+    ],
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group_name}",
+        "awslogs-region": "${log_group_region}",
+        "awslogs-stream-prefix": "api"
+      }
+    }
+  }
+]
