@@ -217,7 +217,8 @@ namespace DocumentAPI.Services
             {
                 result.Entries = result.Entries.Where(i =>
                     // parse and filter out entries where Not Public equals true
-                    !(bool.Parse(i.IndexValues[columnIndex]))
+                    // default to not public for documents that do not have a value
+                    !(bool.TryParse(i.IndexValues[columnIndex], out var notPublic) ? notPublic : true)
                 ).ToList();
             };
             return result;
