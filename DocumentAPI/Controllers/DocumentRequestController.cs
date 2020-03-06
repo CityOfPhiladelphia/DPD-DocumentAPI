@@ -20,16 +20,25 @@ namespace DocumentAPI.Controllers
             _logger = logger;
         }
 
-
         // GET: api/v1/document-request/entities
         /// <summary>
         /// Get the initial list of Entities. Each entity has a distinct set of Categories.
         /// </summary>
         /// <returns>Json(List - Entity)</returns>
         [HttpGet("entities")]
-        public JsonResult GetEntities()
+        public async Task<IActionResult> GetEntities()
         {
-            return new JsonResult(DocumentCategories.Entities);
+            var entities = await _queryAppsServices.GetEntities();
+            if (entities != null && entities.Any())
+            {
+                _logger.LogInformation("Successfully retrieved entity list.");
+                return new JsonResult(entities);
+            }
+            else
+            {
+                _logger.LogError("Cannot get entities.");
+                return NotFound();
+            }
         }
 
         // GET: api/v1/document-request/document-categories/{entityName}
@@ -39,9 +48,20 @@ namespace DocumentAPI.Controllers
         /// <param name="entityName">The Name property of the selected Entity</param>
         /// <returns>Json(List - Category)</returns>
         [HttpGet("document-categories/{entityName}")]
-        public JsonResult GetDocumentCategories(string entityName)
+        public async Task<IActionResult> GetDocumentCategories(string entityName)
         {
-            return new JsonResult(DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName).Categories);
+            var entities = await _queryAppsServices.GetEntities();
+            var documentCategories = entities.SingleOrDefault(i => i.Name == entityName)?.Categories;
+            if (documentCategories != null)
+            {
+                _logger.LogInformation("Successfully retrieved document category list.");
+                return new JsonResult(documentCategories);
+            }
+            else
+            {
+                _logger.LogError("Cannot get document categories.");
+                return NotFound();
+            }
         }
 
         // GET: api/v1/document-request/document-list/{entityName}/{categoryName}
@@ -52,18 +72,30 @@ namespace DocumentAPI.Controllers
         /// <param name="categoryName">The Name property of the selected Category</param>
         /// <returns>Json(QueryAppsResult)</returns>
         [HttpGet("document-list/{entityName}/{categoryName}")]
-        public async Task<JsonResult> GetDocumentList(string entityName, string categoryName)
+        public async Task<IActionResult> GetDocumentList(string entityName, string categoryName)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName);
+            var entities = await _queryAppsServices.GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Name == entityName);
             var category = entity?.Categories.SingleOrDefault(i => i.Name == categoryName);
             if (category != null)
             {
+                _logger.LogInformation("Successfully retrieved document category.");
                 var queryAppsResult = await _queryAppsServices.GetAllDocuments(entity.Id, category.Id);
-                return new JsonResult(queryAppsResult.ToApiResult());
+                if (queryAppsResult.Entries.Count > 0)
+                {
+                    _logger.LogInformation("Successfully retrieved document category & document list.");
+                    return new JsonResult(queryAppsResult.ToApiResult());
+                }
+                else
+                {
+                    _logger.LogWarning("Successfully retrieved document category, but no documents were found.");
+                    return NotFound();
+                }
             }
             else
             {
-                return new JsonResult(NotFound());
+                _logger.LogError("Cannot get document category.");
+                return NotFound();
             }
         }
 
@@ -74,17 +106,19 @@ namespace DocumentAPI.Controllers
         /// <param name="category">A category object</param>
         /// <returns>Json(QueryAppsResult)</returns>
         [HttpPost("filtered-document-list")]
-        public async Task<JsonResult> GetFilteredDocumentList([FromBody]Category category)
+        public async Task<IActionResult> GetFilteredDocumentList([FromBody]Category category)
         {
             var xTenderDocumentList = await _queryAppsServices.FilterQueryAppsResultByParameters(category);
 
             if (xTenderDocumentList.Entries != null)
             {
+                _logger.LogInformation("Successfully retrieved document category & filtered document list.");
                 return new JsonResult(xTenderDocumentList.ToApiResult());
             }
             else
             {
-                return new JsonResult(NotFound());
+                _logger.LogWarning("Successfully retrieved document category, but no documents were found.");
+                return NotFound();
             }
         }
 
@@ -100,20 +134,36 @@ namespace DocumentAPI.Controllers
         [Produces("application/pdf", "application/problem+json")]
         public async Task<IActionResult> GetDocument(string entityName, string categoryName, int documentId)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Name == entityName);
-            var category = entity.Categories.SingleOrDefault(i => i.Name == categoryName);
-
-            var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(entity.Id, category.Id, documentId);
-
-            if (!await isPublic)
+            var entities = await _queryAppsServices.GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Name == entityName);
+            if (entity != null)
             {
+                var category = entity.Categories.SingleOrDefault(i => i.Name == categoryName);
+                if (category != null)
+                {
+                    var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(entity.Id, category.Id, documentId);
+
+                    if (!await isPublic)
+                    {
+                        return NotFound();
+                    };
+
+                    var request = await _queryAppsServices.BuildDocumentRequest(entity.Id, category.Id, documentId);
+
+                    var file = await _queryAppsServices.GetResponse(request);
+                    return new FileStreamResult(file, "application/pdf");
+                }
+                else
+                {
+                    _logger.LogError($"Category: {categoryName} not found.");
+                    return NotFound();
+                }
+            }
+            else
+            {
+                _logger.LogError($"Entity: {entityName} not found.");
                 return NotFound();
-            };
-
-            var request = _queryAppsServices.BuildDocumentRequest(entity.Id, category.Id, documentId);
-
-            var file = await _queryAppsServices.GetResponse(request);
-            return new FileStreamResult(file, "application/pdf");
+            }
         }
     }
 }

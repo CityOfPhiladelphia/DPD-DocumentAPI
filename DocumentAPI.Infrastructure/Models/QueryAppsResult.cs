@@ -59,7 +59,7 @@ namespace DocumentAPI.Infrastructure.Models
 
             foreach (var attribute in documentCategory.Attributes)
             {
-                var betweenOperators = new Collection<string> { DocumentCategories.DateBetweenOperator, DocumentCategories.NumericBetweenOperator, DocumentCategories.TextBetweenOperator };
+                var betweenOperators = new Collection<string> { DepartmentEntities.DateBetweenOperator, DepartmentEntities.NumericBetweenOperator, DepartmentEntities.TextBetweenOperator };
 
                 if (attribute.Name == selectedFilterName1)
                 {
