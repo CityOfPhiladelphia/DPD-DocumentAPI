@@ -1,0 +1,216 @@
+{
+  "Entities": [
+    {
+      "id": 1,
+      "name": "Historical_Commission",
+      "displayName": "Historical Commission",
+      "categories": [
+        {
+          "id": 6,
+          "name": "HISTORICAL_COMM-CARD_CATALOG",
+          "displayName": "Card Catalog",
+          "attributes": [
+            {
+              "fieldNumber": 1,
+              "name": "HOUSE NUMBER",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "STREET DIRECTION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "STREET NAME",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 4,
+              "name": "STREET DESIGNATION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 5,
+              "name": "SCAN DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 6,
+              "name": "BOX #",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 7,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": null,
+          "entityId": 1
+        },
+        {
+          "id": 7,
+          "name": "HISTORICAL_COMM-MEETING_MINUTES",
+          "displayName": "Meeting Minutes",
+          "attributes": [
+            {
+              "fieldNumber": 5,
+              "name": "DOCUMENT NAME",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 1,
+              "name": "DOCUMENT DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 7,
+              "name": "DOCUMENT TYPE",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "MEETING NUMBER",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 9,
+              "name": "BODY",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 11,
+              "name": "COMMENT",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "ARCHIVE DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 12,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": "NOT PUBLIC",
+          "entityId": 1
+        },
+        {
+          "id": 4,
+          "name": "HISTORICAL_COMM-PERMITS",
+          "displayName": "Permits",
+          "attributes": [
+            {
+              "fieldNumber": 1,
+              "name": "PERMIT NUMBER",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "HOUSE NUMBER",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "STREET DIRECTION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 4,
+              "name": "STREET NAME",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 5,
+              "name": "STREET DESIGNATION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 6,
+              "name": "LOCATION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 7,
+              "name": "SCAN DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 8,
+              "name": "BOX #",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 9,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": null,
+          "entityId": 1
+        },
+        {
+          "id": 3,
+          "name": "HISTORICAL_COMM-POLAROIDS",
+          "displayName": "Polaroids",
+          "attributes": [
+            {
+              "fieldNumber": 1,
+              "name": "LOCATION",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "SCAN DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "BOX #",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 4,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": null,
+          "entityId": 1
+        },
+        {
+          "id": 5,
+          "name": "HISTORICAL_COMM-REGISTRY",
+          "displayName": "Registry",
+          "attributes": [
+            {
+              "fieldNumber": 1,
+              "name": "LOCATION",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "SCAN DATE",
+              "type": "DATE"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "BOX #",
+              "type": "NUMERIC"
+            },
+            {
+              "fieldNumber": 4,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": null,
+          "entityId": 1
+        }
+      ]
+    }
+  ]
+}

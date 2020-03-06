@@ -14,20 +14,20 @@ using Microsoft.AspNetCore.Http;
 using System.Net;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace DocumentAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, ILogger<Startup> logger, IHostingEnvironment env)
+        public Startup(ILogger<Startup> logger, IHostingEnvironment env)
         {
-            _configuration = configuration;
             _logger = logger;
             _env = env;
         }
 
         private ILogger _logger;
-        public IConfiguration _configuration { get; }
+        public IConfiguration _configuration { get; set; }
 
         private IHostingEnvironment _env;
 
@@ -36,10 +36,22 @@ namespace DocumentAPI
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(_env.ContentRootPath)
-                .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
+                .AddJsonFile($"RepoConfig.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-            configBuilder.Build();
+            if (_env.IsProduction())
+            {
+                configBuilder.AddEnvironmentVariables();
+            }
+            else
+            {
+                configBuilder.AddUserSecrets<Startup>();
+            }
+
+            _configuration = configBuilder.Build();
+
+            services.AddSingleton(_configuration);
 
             var httpClientHandler = new HttpClientHandler()
             {
@@ -55,7 +67,6 @@ namespace DocumentAPI
                 l.AddAWSProvider(_configuration.GetAWSLoggingConfigSection());
                 l.SetMinimumLevel(LogLevel.Debug);
             });
-
 
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();

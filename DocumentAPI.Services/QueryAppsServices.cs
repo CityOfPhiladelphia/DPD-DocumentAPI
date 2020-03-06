@@ -21,12 +21,20 @@ namespace DocumentAPI.Services
         private readonly HttpClient _httpClient;
         private readonly Config _config;
         private ILogger _logger;
+        private readonly DepartmentEntities _documentCategories;
 
         public QueryAppsServices(HttpClient httpClient, IConfiguration config, ILogger<QueryAppsServices> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
             _config = config.Load();
+
+            _documentCategories = new DepartmentEntities(config);
+        }
+
+        public async Task<ICollection<Entity>> GetEntities()
+        {
+            return _documentCategories.Entities;
         }
 
         public async Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category)
@@ -37,77 +45,77 @@ namespace DocumentAPI.Services
             foreach (var filteredAttribute in filteredAttributes)
             {
                 var query = "";
-                if (filteredAttribute.Type.Name == DocumentCategories.TextTypeName)
+                if (filteredAttribute.Type.Name == DepartmentEntities.TextTypeName)
                 {
                     var stringFilter1 = filteredAttribute.FilterValue1;
                     var stringFilter2 = filteredAttribute.FilterValue2;
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
-                        case DocumentCategories.TextEqualsOperator:
+                        case DepartmentEntities.TextEqualsOperator:
                             query = $"{stringFilter1}";
                             break;
-                        case DocumentCategories.TextGreaterThanOperator:
+                        case DepartmentEntities.TextGreaterThanOperator:
                             query = $"Expression: > {stringFilter1}";
                             break;
-                        case DocumentCategories.TextLessThanOperator:
+                        case DepartmentEntities.TextLessThanOperator:
                             query = $"Expression: < {stringFilter1}";
                             break;
-                        case DocumentCategories.TextBetweenOperator:
+                        case DepartmentEntities.TextBetweenOperator:
                             query = $"Expression: ['{stringFilter1}','{stringFilter2}']";
                             break;
                     }
                 }
-                else if (filteredAttribute.Type.Name == DocumentCategories.DateTypeName)
+                else if (filteredAttribute.Type.Name == DepartmentEntities.DateTypeName)
                 {
                     var dateFilter1 = (DateTime.TryParse(filteredAttribute.FilterValue1, out var date1Value) ? date1Value : DateTime.MinValue).ToShortDateString();
                     var dateFilter2 = (DateTime.TryParse(filteredAttribute.FilterValue2, out var date2Value) ? date2Value : DateTime.MinValue).ToShortDateString();
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
-                        case DocumentCategories.DateEqualsOperator:
+                        case DepartmentEntities.DateEqualsOperator:
                             query = $"{dateFilter1}";
                             break;
-                        case DocumentCategories.DateGreaterThanOperator:
+                        case DepartmentEntities.DateGreaterThanOperator:
                             query = $"Expression: > {dateFilter1}";
                             break;
-                        case DocumentCategories.DateLessThanOperator:
+                        case DepartmentEntities.DateLessThanOperator:
                             query = $"Expression: < {dateFilter1}";
                             break;
-                        case DocumentCategories.DateBetweenOperator:
+                        case DepartmentEntities.DateBetweenOperator:
                             query = $"Expression: ['{dateFilter1}','{dateFilter2}']";
                             break;
                     }
                 }
-                else if (filteredAttribute.Type.Name == DocumentCategories.NumericTypeName)
+                else if (filteredAttribute.Type.Name == DepartmentEntities.NumericTypeName)
                 {
                     var numericFilter1 = int.TryParse(filteredAttribute.FilterValue1, out var int1Value) ? int1Value : -1;
                     var numericFilter2 = int.TryParse(filteredAttribute.FilterValue2, out var int2Value) ? int2Value : -1;
 
                     switch (filteredAttribute.SelectedFilterType.Name)
                     {
-                        case DocumentCategories.NumericEqualsOperator:
+                        case DepartmentEntities.NumericEqualsOperator:
                             query = $"{numericFilter1}";
                             break;
-                        case DocumentCategories.NumericGreaterThanOperator:
+                        case DepartmentEntities.NumericGreaterThanOperator:
                             query = $"Expression: > {numericFilter1}";
                             break;
-                        case DocumentCategories.NumericLessThanOperator:
+                        case DepartmentEntities.NumericLessThanOperator:
                             query = $"Expression: < {numericFilter1}";
                             break;
-                        case DocumentCategories.NumericBetweenOperator:
+                        case DepartmentEntities.NumericBetweenOperator:
                             query = $"Expression: ['{numericFilter1}','{numericFilter2}']";
                             break;
                     }
                 }
-                else if (filteredAttribute.Type.Name == DocumentCategories.FullTextSearchName)
+                else if (filteredAttribute.Type.Name == DepartmentEntities.FullTextSearchName)
                 {
                     query = filteredAttribute.FilterValue1;
                 }
 
                 if (!string.IsNullOrEmpty(query))
                 {
-                    if (filteredAttribute.Type.Name == DocumentCategories.FullTextSearchName)
+                    if (filteredAttribute.Type.Name == DepartmentEntities.FullTextSearchName)
                     {
                         adhocQueryObject.FullText = new FullText(query);
                     }
@@ -137,7 +145,8 @@ namespace DocumentAPI.Services
 
         private async Task<QueryAppsResult> RequestDocuments(int entityId, int categoryId, QueryRequestObject queryRequest = null, bool isAdHocQueryRequest = false)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
             var requestPath = isAdHocQueryRequest ? _config.AdHocQueryResultsPath : _config.SelectIndexLookupPath;
@@ -156,14 +165,15 @@ namespace DocumentAPI.Services
             using (var request = await _httpClient.PostAsync(query.Uri, new StringContent(queryJson, Encoding.UTF8, "application/vnd.emc.ax+json")))
             {
                 var result = JsonConvert.DeserializeObject<QueryAppsResult>(await request.Content.ReadAsStringAsync());
-                var filteredResult = result.Entries != null ? ExcludeNonPublicDocuments(result, category) : result;
+                var filteredResult = result.Entries != null && result.Entries.Any() ? ExcludeNonPublicDocuments(result, category) : result;
                 return filteredResult;
             }
         }
 
         private async Task<QueryAppsResult> RequestDocumentsFromOracle(int entityId, int categoryId)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             var result = new QueryAppsResult();
             var oracleConnectionString = _config.OracleConnectionString;
@@ -224,16 +234,17 @@ namespace DocumentAPI.Services
             return result;
         }
 
-        public HttpRequestMessage BuildDocumentRequest(int entityId, int categoryId, int documentId)
+        public async Task<HttpRequestMessage> BuildDocumentRequest(int entityId, int categoryId, int documentId)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
             var requestMessage = new HttpRequestMessage();
             var getFile = new UriBuilder($"{_config.RequestBasePath}/{_config.ExportDocumentPath}/{category.Name}/{documentId}/{_config.Credentials}");
             requestMessage.RequestUri = getFile.Uri;
             requestMessage.Method = HttpMethod.Get;
-            
+
             _logger.LogInformation($"Request built to get document from {requestMessage.RequestUri}");
 
             return requestMessage;
@@ -241,7 +252,8 @@ namespace DocumentAPI.Services
 
         public async Task<bool> CheckIfDocumentIsPublic(int entityId, int categoryId, int documentId)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
 
             var adhocQueryRequest = new QueryRequestObject();

@@ -5,24 +5,34 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using DocumentAPI.Infrastructure.Models;
+using DocumentAPI.Infrastructure.Interfaces;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using DocumentAPI.Services;
 
 namespace DocumentAPI.Tests
 {
     public class FilterObjectTests
     {
+        private readonly TestServer _server;
         private readonly HttpClient _httpClient;
-
+        private readonly IQueryAppsServices _queryAppsServices;
         public FilterObjectTests()
         {
-            var server = new TestServer(new WebHostBuilder()
+            var webHostBuilder = new WebHostBuilder()
                 .ConfigureAppConfiguration(config => config.AddUserSecrets<Startup>())
+                .ConfigureServices(services =>
+                {
+                    services.AddScoped<IQueryAppsServices, QueryAppsServices>();
+                })
                 .UseEnvironment("Development")
-                .UseStartup<Startup>());
+                .UseStartup<Startup>();
+            _server = new TestServer(webHostBuilder);
 
-            _httpClient = server.CreateClient();
+            _httpClient = _server.CreateClient();
+            _queryAppsServices = _server.Host.Services.GetRequiredService<IQueryAppsServices>();
         }
 
         [Theory]
@@ -36,7 +46,8 @@ namespace DocumentAPI.Tests
         public async Task GetFilteredDocumentList_BySingleParameter_ShouldReturnResults(int entityId, int categoryId,
             string selectedFilterName1, string selectedFilterType1, string[] selectedFilterValues)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await _queryAppsServices.GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             category.BuildCategoryWithFilters(selectedFilterName1, selectedFilterType1, selectedFilterValues);
 
@@ -55,7 +66,8 @@ namespace DocumentAPI.Tests
         public async Task GetFilteredDocumentList_NonPublic_ShouldNotReturnResults(int entityId, int categoryId,
             string selectedFilterName, string selectedFilterType, string[] selectedFilterValues)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await _queryAppsServices.GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             category.BuildCategoryWithFilters(selectedFilterName, selectedFilterType, selectedFilterValues);
 
@@ -71,7 +83,8 @@ namespace DocumentAPI.Tests
                             string selectedFilterName1, string selectedFilterType1, string[] selectedFilterValues1,
                             string selectedFilterName2, string selectedFilterType2, string[] selectedFilterValues2)
         {
-            var entity = DocumentCategories.Entities.SingleOrDefault(i => i.Id == entityId);
+            var entities = await _queryAppsServices.GetEntities();
+            var entity = entities.SingleOrDefault(i => i.Id == entityId);
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             category.BuildCategoryWithFilters(selectedFilterName1, selectedFilterType1, selectedFilterValues1, selectedFilterName2, selectedFilterType2, selectedFilterValues2);
 
