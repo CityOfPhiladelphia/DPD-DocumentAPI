@@ -121,7 +121,7 @@ namespace DocumentAPI.Services
                     }
                     else
                     {
-                        adhocQueryObject.Indexes.Add(new Index(filteredAttribute.Name, query));
+                        adhocQueryObject.Indexes.Add(new Infrastructure.Models.Index(filteredAttribute.Name, query));
                     }
                 }
             }
@@ -263,7 +263,7 @@ namespace DocumentAPI.Services
             {
                 if (!string.IsNullOrEmpty(category.NotPublicFieldName))
                 {
-                    adhocQueryRequest.Indexes.Add(new Index(category.NotPublicFieldName, "FALSE"));
+                    adhocQueryRequest.Indexes.Add(new Infrastructure.Models.Index(category.NotPublicFieldName, "FALSE"));
 
                     var adhocQueryJson = JsonConvert.SerializeObject(adhocQueryRequest.Indexes);
 

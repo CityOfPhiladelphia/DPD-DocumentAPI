@@ -15,6 +15,7 @@ using System.Net;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 namespace DocumentAPI
 {
@@ -79,18 +80,26 @@ namespace DocumentAPI
                              builder
                                  .AllowAnyOrigin()
                                  .AllowAnyHeader()
-                                 .AllowAnyMethod()
-                                 .AllowCredentials()
-                                 .SetIsOriginAllowed((host) => true);
+                                 .AllowAnyMethod();
                          });
+                     options.AddPolicy("AllowCredentials",
+                        builder =>
+                        {
+                            builder
+                                .AllowAnyMethod()
+                                .AllowAnyHeader()
+
+                                .AllowCredentials()
+                                .SetIsOriginAllowed(hostName => true);
+                        });
                  });
 
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = $"Document API - {_env.EnvironmentName}", Version = "v1.0" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = $"Document API - {_env.EnvironmentName}", Version = "v1.0" });
                 var xmlFile = Path.ChangeExtension(typeof(Startup).Assembly.Location, ".xml");
                 c.IncludeXmlComments(xmlFile);
             });
@@ -99,7 +108,15 @@ namespace DocumentAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseCors("AllowAll");
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            app
+                .UseCors("AllowAll")
+                .UseCors("AllowCredentials");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -145,8 +162,6 @@ namespace DocumentAPI
                     });
                 });
             }
-
-            app.UseMvc();
         }
     }
 }

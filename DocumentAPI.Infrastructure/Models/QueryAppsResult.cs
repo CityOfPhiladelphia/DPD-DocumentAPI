@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace DocumentAPI.Infrastructure.Models
 {
@@ -16,6 +17,7 @@ namespace DocumentAPI.Infrastructure.Models
 
         public int PageCount { get; set; }
 
+        [JsonIgnore]
         public IList<string> IndexValues { get; set; }
     }
 
