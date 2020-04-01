@@ -42,7 +42,7 @@ namespace DocumentAPI
                 .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-            if (_env.IsProduction())
+            if (_env.IsProduction() || _env.IsEnvironment("TEST"))
             {
                 configBuilder.AddEnvironmentVariables();
             }
@@ -52,13 +52,13 @@ namespace DocumentAPI
             }
 
             _configuration = configBuilder.Build();
-            var keys = _configuration.AsEnumerable().ToList();
-            var configList = "";
-            foreach (var key in keys)
+            if (!_env.IsProduction())
             {
-                configList += $"{key.Key}: {key.Value}\n";
+                var keys = _configuration.AsEnumerable().ToList();
+
+                _logger.LogInformation($"Config Loaded: {JsonConvert.SerializeObject(keys)}");
             }
-            _logger.LogInformation($"Config Loaded:\n {configList}");
+
             services.AddSingleton(_configuration);
 
             var httpClientHandler = new HttpClientHandler()
