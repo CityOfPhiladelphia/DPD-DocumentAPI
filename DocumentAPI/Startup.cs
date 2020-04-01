@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using System.Linq;
 
 namespace DocumentAPI
 {
@@ -51,7 +52,13 @@ namespace DocumentAPI
             }
 
             _configuration = configBuilder.Build();
-
+            var keys = _configuration.AsEnumerable().ToList();
+            var configList = "";
+            foreach (var key in keys)
+            {
+                configList += $"{key.Key}: {key.Value}\n";
+            }
+            _logger.LogInformation($"Config Loaded:\n {configList}");
             services.AddSingleton(_configuration);
 
             var httpClientHandler = new HttpClientHandler()
