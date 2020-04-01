@@ -177,6 +177,7 @@ namespace DocumentAPI.Services
             var category = entity.Categories.SingleOrDefault(i => i.Id == categoryId);
             var result = new QueryAppsResult();
             var oracleConnectionString = _config.OracleConnectionString;
+            _logger.LogInformation($"Oracle Connection String: {oracleConnectionString}");
             using (var axOracleDb = new OracleConnection(oracleConnectionString))
             {
                 using (OracleCommand cmd = axOracleDb.CreateCommand())
