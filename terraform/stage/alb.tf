@@ -31,7 +31,7 @@ resource "aws_lb_target_group" "dpd_front_end" {
     unhealthy_threshold = 2
     protocol            = "HTTP"
     timeout             = 60
-    path                = "/swagger/index.html"
+    path                = "/api/v1/document-request/health-check"
     interval            = 65
   }
 }

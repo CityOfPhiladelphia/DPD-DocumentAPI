@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using System.Linq;
+using Amazon.S3;
 
 namespace DocumentAPI
 {
@@ -68,6 +69,7 @@ namespace DocumentAPI
 
             var httpClient = new HttpClient(httpClientHandler);
 
+            services.AddAWSService<IAmazonS3>();
             services.AddSingleton(httpClient);
 
             services.AddLogging(l =>
@@ -76,6 +78,7 @@ namespace DocumentAPI
                 l.SetMinimumLevel(LogLevel.Debug);
             });
 
+            services.TryAddSingleton<IHealthCheckServices, HealthCheckServices>();
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
 

@@ -22,25 +22,25 @@ namespace DocumentAPI.Infrastructure.Models
             var entities = _config.GetSection("Entities").GetChildren().ToList().Select(e =>
             new Entity
             {
-                Id = int.Parse(e["id"]),
+                Id = int.TryParse(e["id"], out var entityId) ? (int?)entityId : null,
                 Name = e["name"],
                 DisplayName = e["displayname"],
                 Categories = e.GetSection("categories").GetChildren()
                                         .Select(i => new Category
                                         {
-                                            Id = int.Parse(i["id"]),
+                                            Id = int.TryParse(i["id"], out var categoryId) ? (int?)categoryId : null,
                                             Name = i["name"],
                                             DisplayName = i["displayName"],
-                                            EntityId = int.Parse(e["id"]),
+                                            EntityId = int.TryParse(e["id"], out var entityId) ? (int?)entityId : null,
                                             NotPublicFieldName = i["notPublicFieldName"],
                                             Attributes = i.GetSection("attributes").GetChildren()
                                                 .Select(x => new Attribute
                                                 {
-                                                    FieldNumber = int.Parse(x["fieldNumber"]),
+                                                    FieldNumber = int.TryParse(x["fieldNumber"], out var fieldNumber) ? (int?)fieldNumber : null,
                                                     Name = x["name"],
                                                     Type = attributeTypes.SingleOrDefault(a => a.Name == x["type"])
                                                 }).ToList()
-                                        })
+                                        }).ToList()
             });
 
             // Add full text search attribute to all Categories for all Entities
@@ -146,32 +146,32 @@ namespace DocumentAPI.Infrastructure.Models
 
     public class Entity
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public string Name { get; set; }
 
         public string DisplayName { get; set; }
 
-        public IEnumerable<Category> Categories { get; set; }
+        public List<Category> Categories { get; set; }
     }
 
     public class Category
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public string Name { get; set; }
 
         public string DisplayName { get; set; }
 
-        public ICollection<Attribute> Attributes { get; set; }
+        public List<Attribute> Attributes { get; set; }
         public string NotPublicFieldName { get; set; }
 
-        public int EntityId { get; set; }
+        public int? EntityId { get; set; }
     }
 
     public class Attribute
     {
-        public int FieldNumber { get; set; }
+        public int? FieldNumber { get; set; }
 
         public string Name { get; set; }
 

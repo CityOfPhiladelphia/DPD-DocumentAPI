@@ -4,6 +4,12 @@
         <name>DocumentAPI</name>
     </assembly>
     <members>
+        <member name="M:DocumentAPI.Controllers.DocumentRequestController.HealthCheck">
+            <summary>
+            Result of this endpoint will indicate whether API is functioning normally
+            </summary>
+            <returns>Boolean</returns>
+        </member>
         <member name="M:DocumentAPI.Controllers.DocumentRequestController.GetEntities">
             <summary>
             Get the initial list of Entities. Each entity has a distinct set of Categories.

@@ -4,6 +4,9 @@ using DocumentAPI.Infrastructure.Interfaces;
 using DocumentAPI.Infrastructure.Models;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System;
 
 namespace DocumentAPI.Controllers
 {
@@ -11,13 +14,68 @@ namespace DocumentAPI.Controllers
     [ApiController]
     public class DocumentRequestController : ControllerBase
     {
+        private readonly IHealthCheckServices _healthCheckServices;
         private readonly IQueryAppsServices _queryAppsServices;
         private ILogger _logger;
 
-        public DocumentRequestController(IQueryAppsServices queryAppsServices, ILogger<DocumentRequestController> logger)
+        public DocumentRequestController(IHealthCheckServices healthCheckServices, IQueryAppsServices queryAppsServices, ILogger<DocumentRequestController> logger)
         {
+            _healthCheckServices = healthCheckServices;
             _queryAppsServices = queryAppsServices;
             _logger = logger;
+        }
+
+        // GET: api/v1/health-check
+        /// <summary>
+        /// Result of this endpoint will indicate whether API is functioning normally
+        /// </summary>
+        /// <returns>Boolean</returns>
+
+        [HttpGet("health-check")]
+        public async Task<IActionResult> HealthCheck()
+        {
+            var healthCheckResponse = new HealthCheckResponse();
+
+            if (_queryAppsServices != null)
+            {
+                var internalHealthCheck = _healthCheckServices.CheckInternalDependencies();
+
+                //var externalHealthCheck = await _healthCheckServices.CheckExternalDependencies();
+                //healthCheckResponse.Results.Add(
+                //    new HealthCheckResult()
+                //    {
+                //        Success = externalHealthCheck.Success,
+                //        Message = externalHealthCheck.Message
+                //    });
+
+                await Task.WhenAll(new[] { internalHealthCheck });
+                healthCheckResponse.Results.AddRange(new[] {
+                    new HealthCheckResult()
+                    {
+                        Success = internalHealthCheck.Result.Success,
+                        Message = internalHealthCheck.Result.Message
+                    }
+                });
+
+                healthCheckResponse.Success = healthCheckResponse.Results.All(i => i.Success);
+            }
+            else
+            {
+                healthCheckResponse.Success = false;
+            }
+
+            healthCheckResponse.Message = string.Join(Environment.NewLine, healthCheckResponse.Results.Select(i => i.Message));
+            var response = JsonConvert.SerializeObject(new { healthCheckResponse.Success, healthCheckResponse.Message }, Formatting.Indented);
+
+            if (healthCheckResponse.Success)
+            {
+                return new JsonResult(response);
+            }
+            else
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
         }
 
         // GET: api/v1/document-request/entities
@@ -80,7 +138,7 @@ namespace DocumentAPI.Controllers
             if (category != null)
             {
                 _logger.LogInformation("Successfully retrieved document category.");
-                var queryAppsResult = await _queryAppsServices.GetAllDocuments(entity.Id, category.Id);
+                var queryAppsResult = await _queryAppsServices.GetAllDocuments(entity.Id.GetValueOrDefault(), category.Id.GetValueOrDefault());
                 if (queryAppsResult.Entries.Count > 0)
                 {
                     _logger.LogInformation("Successfully retrieved document category & document list.");
@@ -141,14 +199,14 @@ namespace DocumentAPI.Controllers
                 var category = entity.Categories.SingleOrDefault(i => i.Name == categoryName);
                 if (category != null)
                 {
-                    var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(entity.Id, category.Id, documentId);
+                    var isPublic = _queryAppsServices.CheckIfDocumentIsPublic(entity.Id.GetValueOrDefault(), category.Id.GetValueOrDefault(), documentId);
 
                     if (!await isPublic)
                     {
                         return NotFound();
                     };
 
-                    var request = await _queryAppsServices.BuildDocumentRequest(entity.Id, category.Id, documentId);
+                    var request = await _queryAppsServices.BuildDocumentRequest(entity.Id.GetValueOrDefault(), category.Id.GetValueOrDefault(), documentId);
 
                     var file = await _queryAppsServices.GetResponse(request);
                     return new FileStreamResult(file, "application/pdf");
