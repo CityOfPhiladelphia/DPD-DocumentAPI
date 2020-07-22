@@ -1,7 +1,7 @@
 [
   {
     "name": "${project}-${environment}-${infra}",
-    "image": "922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api:latest",
+    "image": "922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api:test-latest",
     "memoryReservation": 256,
     "essential": true,
     "environment": [
@@ -14,10 +14,6 @@
         "value": "${Credentials}"
       },
       {
-        "name": "RequestBasePath",
-        "value": "${RequestBasePath}"
-      },
-      {
         "name": "AdHocQueryResultsPath",
         "value": "${AdHocQueryResultsPath}"
       },
@@ -26,21 +22,25 @@
         "value": "${SelectIndexLookupPath}"
       },
       {
-        "name": "QueryAppsPath",
-        "value": "${QueryAppsPath}"
-      },
-      {
-        "name": "RetrieveDocumentPath",
-        "value": "${RetrieveDocumentPath}"
-      },
-      {
-        "name": "ExportDocumentPath",
-        "value": "${ExportDocumentPath}"
-      },
-      {
         "name": "OracleConnectionString",
         "value": "${OracleConnectionString}"
-      }
+      },
+      {
+        "name": "S3BucketName", 
+        "value": "${S3BucketName}"
+      },
+      {
+        "name": "S3Region", 
+        "value": "${S3Region}"
+      },
+      {
+        "name": "S3AccessKeyID", 
+        "value": "${S3AccessKeyID}"
+      },
+      {
+        "name": "S3SecretAccessKey",
+        "value": "${S3SecretAccessKey}"
+      }   
     ],
     "portMappings": [
       {
