@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace DocumentAPI.Infrastructure.Models
 {
@@ -16,6 +17,7 @@ namespace DocumentAPI.Infrastructure.Models
 
         public int PageCount { get; set; }
 
+        [JsonIgnore]
         public IList<string> IndexValues { get; set; }
     }
 
@@ -59,7 +61,7 @@ namespace DocumentAPI.Infrastructure.Models
 
             foreach (var attribute in documentCategory.Attributes)
             {
-                var betweenOperators = new Collection<string> { DocumentCategories.DateBetweenOperator, DocumentCategories.NumericBetweenOperator, DocumentCategories.TextBetweenOperator };
+                var betweenOperators = new Collection<string> { DepartmentEntities.DateBetweenOperator, DepartmentEntities.NumericBetweenOperator, DepartmentEntities.TextBetweenOperator };
 
                 if (attribute.Name == selectedFilterName1)
                 {

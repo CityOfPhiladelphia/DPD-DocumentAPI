@@ -6,15 +6,20 @@ namespace DocumentAPI.Infrastructure.Models
     {
         public string Credentials { get; set; }
 
-        public string RequestBasePath { get; set; }
-
         public string AdHocQueryResultsPath { get; set; }
 
         public string SelectIndexLookupPath { get; set; }
 
-        public string ExportDocumentPath { get; set; }
-
         public string OracleConnectionString { get; set; }
+
+        public string S3BucketName { get; set; }
+
+        public string S3Region { get; set; }
+
+        public string S3AccessKeyID { get; set; }
+
+        public string S3SecretAccessKey { get; set; }
+
     }
 
     public static class ConfigExtensions
@@ -24,11 +29,13 @@ namespace DocumentAPI.Infrastructure.Models
             return new Config
             {
                 Credentials = config["Credentials"],
-                RequestBasePath = config["RequestBasePath"],
                 AdHocQueryResultsPath = config["AdHocQueryResultsPath"],
                 SelectIndexLookupPath = config["SelectIndexLookupPath"],
-                ExportDocumentPath = config["ExportDocumentPath"],
-                OracleConnectionString = config["OracleConnectionString"]
+                OracleConnectionString = config["OracleConnectionString"],
+                S3BucketName = config["S3BucketName"],
+                S3Region = config["S3Region"],
+                S3AccessKeyID = config["S3AccessKeyID"],
+                S3SecretAccessKey = config["S3SecretAccessKey"],
             };
         }
     }

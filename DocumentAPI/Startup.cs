@@ -14,20 +14,23 @@ using Microsoft.AspNetCore.Http;
 using System.Net;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
+using Microsoft.OpenApi.Models;
+using System.Linq;
+using Amazon.S3;
 
 namespace DocumentAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, ILogger<Startup> logger, IHostingEnvironment env)
+        public Startup(ILogger<Startup> logger, IHostingEnvironment env)
         {
-            _configuration = configuration;
             _logger = logger;
             _env = env;
         }
 
         private ILogger _logger;
-        public IConfiguration _configuration { get; }
+        public IConfiguration _configuration { get; set; }
 
         private IHostingEnvironment _env;
 
@@ -36,10 +39,28 @@ namespace DocumentAPI
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(_env.ContentRootPath)
-                .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
+                .AddJsonFile($"RepoConfig.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-            configBuilder.Build();
+            if (_env.IsProduction() || _env.IsEnvironment("TEST"))
+            {
+                configBuilder.AddEnvironmentVariables();
+            }
+            else
+            {
+                configBuilder.AddUserSecrets<Startup>();
+            }
+
+            _configuration = configBuilder.Build();
+            if (!_env.IsProduction())
+            {
+                var keys = _configuration.AsEnumerable().ToList();
+
+                _logger.LogInformation($"Config Loaded: {JsonConvert.SerializeObject(keys)}");
+            }
+
+            services.AddSingleton(_configuration);
 
             var httpClientHandler = new HttpClientHandler()
             {
@@ -48,6 +69,7 @@ namespace DocumentAPI
 
             var httpClient = new HttpClient(httpClientHandler);
 
+            services.AddAWSService<IAmazonS3>();
             services.AddSingleton(httpClient);
 
             services.AddLogging(l =>
@@ -56,7 +78,7 @@ namespace DocumentAPI
                 l.SetMinimumLevel(LogLevel.Debug);
             });
 
-
+            services.TryAddSingleton<IHealthCheckServices, HealthCheckServices>();
             services.TryAddTransient<IQueryAppsServices, QueryAppsServices>();
             services.AddHttpClient<IQueryAppsServices, QueryAppsServices>();
 
@@ -68,18 +90,26 @@ namespace DocumentAPI
                              builder
                                  .AllowAnyOrigin()
                                  .AllowAnyHeader()
-                                 .AllowAnyMethod()
-                                 .AllowCredentials()
-                                 .SetIsOriginAllowed((host) => true);
+                                 .AllowAnyMethod();
                          });
+                     options.AddPolicy("AllowCredentials",
+                        builder =>
+                        {
+                            builder
+                                .AllowAnyMethod()
+                                .AllowAnyHeader()
+
+                                .AllowCredentials()
+                                .SetIsOriginAllowed(hostName => true);
+                        });
                  });
 
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = $"Document API - {_env.EnvironmentName}", Version = "v1.0" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = $"Document API - {_env.EnvironmentName}", Version = "v1.0" });
                 var xmlFile = Path.ChangeExtension(typeof(Startup).Assembly.Location, ".xml");
                 c.IncludeXmlComments(xmlFile);
             });
@@ -88,7 +118,15 @@ namespace DocumentAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseCors("AllowAll");
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            app
+                .UseCors("AllowAll")
+                .UseCors("AllowCredentials");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -134,8 +172,6 @@ namespace DocumentAPI
                     });
                 });
             }
-
-            app.UseMvc();
         }
     }
 }
