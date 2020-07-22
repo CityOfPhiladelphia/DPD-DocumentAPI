@@ -15,13 +15,13 @@ data "template_file" "dpd_document_api" {
     log_group_name         = "${aws_cloudwatch_log_group.dpd_document_api_log_group.name}"
     log_group_region       = "${var.aws_region}"
     Credentials            = "${var.Credentials}"
-    RequestBasePath        = "${var.RequestBasePath}"
     AdHocQueryResultsPath  = "${var.AdHocQueryResultsPath}"
     SelectIndexLookupPath  = "${var.SelectIndexLookupPath}"
-    QueryAppsPath          = "${var.QueryAppsPath}"
-    RetrieveDocumentPath   = "${var.RetrieveDocumentPath}"
-    ExportDocumentPath     = "${var.ExportDocumentPath}"
     OracleConnectionString = "${var.OracleConnectionString}"
+    S3BucketName           = "${var.S3BucketName}"
+    S3Region               = "${var.S3Region}"
+    S3AccessKeyID          = "${var.S3AccessKeyID}"
+    S3SecretAccessKey      = "${var.S3SecretAccessKey}"
   }
 }
 
