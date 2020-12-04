@@ -98,6 +98,7 @@ namespace DocumentAPI.Tests
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-CARD_CATALOG", 744)]
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-MEETING_MINUTES", 1882)]
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-MEETING_MINUTES", 743, false)]
+        [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-MEETING_MINUTES", 2097)]
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-PERMITS", 1233)]
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-POLAROIDS", 1)]
         [InlineData("GET", "Historical_Commission", "HISTORICAL_COMM-REGISTRY", 700)]
