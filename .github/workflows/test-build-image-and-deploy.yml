@@ -7,7 +7,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-16.04
     env:
-      config: 'Test'
+      config: 'Release'
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
