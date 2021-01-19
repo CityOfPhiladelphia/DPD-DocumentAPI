@@ -1,32 +1,76 @@
-name: Build & Deploy to Test Env
-
+name: Test, Build and deploy to TEST
 on:
   push:
     branches:
       - master
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-16.04
-
+    env:
+      config: 'TEST'
     steps:
-      - uses: actions/checkout@v1
-      - name: Build the Docker image
-        run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:test-latest .
-      - name: Push Image to ECR (Test)
-        env:
-          ASPNETCORE_ENVIRONMENT: 'Test'
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
-        run: |
-          $(aws ecr get-login --no-include-email --region us-east-1)
-          docker tag dpd-document-api:test-latest $REPOSITORY_URL:test-latest
-          docker push $REPOSITORY_URL:test-latest
-      - name: Deploy to Fargate
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
-        run: |
-          aws ecs update-service --cluster dpd-document-api-test-cluster --service dpd-document-api-test-service --force-new-deployment --region us-east-1
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101    
+
+      # restore dependencies  
+    - name: Install dependencies
+      run: dotnet restore
+
+      # build project
+    - name: Build the Docker image
+      run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:test-latest .
+      # set pr number, if it's a pr build
+    - name: set pr build number
+      id: PRNUMBER
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: kkak10/pr-number-action@v1.3
+      # set report file and title 
+    - name: Set Test Title
+      run: | 
+            if ${{ github.event_name == 'pull_request' }}
+            then
+              echo "::set-env name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})"
+              echo "::set-env name=file_name::TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md"
+            else
+              echo "::set-env name=title::Test Run ${{github.run_number}}"
+              echo "::set-env name=file_name::TestReport.${{github.run_number}}.md"
+            fi
+      # run tests with built project
+    - name: Test PR      
+      run: dotnet test --no-restore --no-build --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
+      # upload report as build artifact
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2
+      if: ${{always()}}
+      with:
+        name: 'Test Run'
+        path: ${{github.workspace}}/${{env.file_name}}
+      # add report as PR comment (if PR)
+    - name: comment PR
+      uses: machine-learning-apps/pr-comment@master
+      if: ${{ github.event_name == 'pull_request' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        path: ${{env.file_name}}
+
+    - name: Push Image to ECR (Test)
+      env:
+        ASPNETCORE_ENVIRONMENT: 'TEST'
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
+      run: |
+        $(aws ecr get-login --no-include-email --region us-east-1)
+        docker tag dpd-document-api:test-latest $REPOSITORY_URL:test-latest
+        docker push $REPOSITORY_URL:test-latest
+    - name: Deploy to Fargate
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
+      run: |
+        aws ecs update-service --cluster dpd-document-api-test-cluster --service dpd-document-api-test-service --force-new-deployment --region us-east-1
