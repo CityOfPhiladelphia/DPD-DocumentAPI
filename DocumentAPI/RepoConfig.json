@@ -211,6 +211,42 @@
           "entityId": 1
         }
       ]
+    },
+    {
+      "id": 2,
+      "name": "DHCD",
+      "displayName": "Division of Housing and Community Development",
+      "categories": [
+        {
+          "id": 119,
+          "name": "DHCD_REPORTS",
+          "displayName": "Reports",
+          "attributes": [
+            {
+              "fieldNumber": 1,
+              "name": "DOCUMENT NAME",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 2,
+              "name": "DOCUMENT TYPE",
+              "type": "TEXT"
+            },
+            {
+              "fieldNumber": 3,
+              "name": "REPORT YEAR",
+              "type": "NUMERIC"
+            },        
+            {
+              "fieldNumber": 7,
+              "name": "FULL_TEXT",
+              "type": "FULL_TEXT"
+            }
+          ],
+          "notPublicFieldName": null,
+          "entityId": 2
+        }
+      ]
     }
   ]
 }
