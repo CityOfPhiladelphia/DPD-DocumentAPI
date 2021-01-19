@@ -7,7 +7,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-16.04
     env:
-      config: 'TEST'
+      config: 'Test'
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -60,11 +60,11 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-16.04
     env:
-      config: 'TEST'
+      config: 'Test'
     steps:
     - name: Push Image to ECR (Test)
       env:
-        ASPNETCORE_ENVIRONMENT: 'TEST'
+        ASPNETCORE_ENVIRONMENT: 'Test'
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api

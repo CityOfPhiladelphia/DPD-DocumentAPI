@@ -43,7 +43,7 @@ namespace DocumentAPI
                 .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{_env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-            if (_env.IsProduction() || _env.IsEnvironment("TEST"))
+            if (_env.IsProduction() || _env.IsEnvironment("Test"))
             {
                 configBuilder.AddEnvironmentVariables();
             }
