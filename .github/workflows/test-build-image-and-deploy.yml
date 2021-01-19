@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:latest .
+        run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:test-latest .
       - name: Push Image to ECR (Test)
         env:
           ASPNETCORE_ENVIRONMENT: 'Test'
