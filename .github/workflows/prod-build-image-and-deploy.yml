@@ -1,16 +1,15 @@
-name: Build & Deploy to Prod
-
+name: Test, Build and deploy to PRODUCTION
 on:
   push:
     branches:
       - production
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-16.04
-
+    env:
+      config: 'Release'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Build the Docker image
         run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:latest .
       - name: Push Image to ECR (Prod)
