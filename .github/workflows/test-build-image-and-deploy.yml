@@ -20,8 +20,9 @@ jobs:
       run: dotnet restore
 
       # build project
-    - name: Build the Docker image
-      run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:test-latest .
+    - name: Build
+      run: dotnet build --configuration $config --no-restore
+
       # set pr number, if it's a pr build
     - name: set pr build number
       id: PRNUMBER
@@ -56,12 +57,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         path: ${{env.file_name}}
-  deploy:
+  build-image-and-deploy:
     needs: build-and-test
     runs-on: ubuntu-16.04
     env:
       config: 'Test'
     steps:
+    # build docker image
+    - name: Build the Docker image
+      run: docker build -f DocumentAPI/Dockerfile -t dpd-document-api:test-latest .
     - name: Push Image to ECR (Test)
       env:
         ASPNETCORE_ENVIRONMENT: 'Test'
