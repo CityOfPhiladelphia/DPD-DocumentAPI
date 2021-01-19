@@ -105,11 +105,12 @@ for categoryId in CategoryIds:
                     os.remove(pdf_file)
 
                 except Exception as e:
+                    date_time  = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
                     print(pdf_file + ' ************ AWS UPLOAD FAILED ************')
                     message = f"\n Could Not Upload Document To AWS S3 \n {str(e)} \n"
                     f.close()
                     b = open(log_dir + app + '_ERROR.log', 'a+')
-                    b.write(str(doc[0]) + message + '\n')
+                    b.write(str(doc[0]) + ' ' + pdf_file + "@ " + date_time + ": " + message + '\n')
                     b.close()
 
 
