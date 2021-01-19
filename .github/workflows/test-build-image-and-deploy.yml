@@ -4,7 +4,7 @@ on:
     branches:
       - master
 jobs:
-  build-and-deploy:
+  build-and-test:
     runs-on: ubuntu-16.04
     env:
       config: 'TEST'
@@ -32,11 +32,11 @@ jobs:
       run: | 
             if ${{ github.event_name == 'pull_request' }}
             then
-              echo "::set-env name=title::Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})"
-              echo "::set-env name=file_name::TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md"
+              echo "title=Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md" >> $GITHUB_ENV
             else
-              echo "::set-env name=title::Test Run ${{github.run_number}}"
-              echo "::set-env name=file_name::TestReport.${{github.run_number}}.md"
+              echo "title=Test Run ${{github.run_number}}" >> $GITHUB_ENV
+              echo "file_name=TestReport.${{github.run_number}}.md" >> $GITHUB_ENV
             fi
       # run tests with built project
     - name: Test PR      
@@ -56,7 +56,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         path: ${{env.file_name}}
-
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-16.04
+    env:
+      config: 'TEST'
+    steps:
     - name: Push Image to ECR (Test)
       env:
         ASPNETCORE_ENVIRONMENT: 'TEST'
