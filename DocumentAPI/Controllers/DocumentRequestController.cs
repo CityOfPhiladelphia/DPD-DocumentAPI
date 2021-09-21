@@ -164,7 +164,7 @@ namespace DocumentAPI.Controllers
         /// <param name="category">A category object</param>
         /// <returns>Json(QueryAppsResult)</returns>
         [HttpPost("filtered-document-list")]
-        public async Task<IActionResult> GetFilteredDocumentList([FromBody]Category category)
+        public async Task<IActionResult> GetFilteredDocumentList([FromBody] Category category)
         {
             var xTenderDocumentList = await _queryAppsServices.FilterQueryAppsResultByParameters(category);
 
@@ -206,10 +206,23 @@ namespace DocumentAPI.Controllers
                         return NotFound();
                     };
 
-                    var request = await _queryAppsServices.BuildDocumentRequest(entity.Id.GetValueOrDefault(), category.Id.GetValueOrDefault(), documentId);
+                    var exportRequest = await _queryAppsServices.StartDocumentRequest(entity.Id.GetValueOrDefault(), category.Id.GetValueOrDefault(), documentId);
 
-                    var file = await _queryAppsServices.GetResponse(request);
-                    return new FileStreamResult(file, "application/pdf");
+                    var jobTokenResultString = await _queryAppsServices.GetResponseString(exportRequest);
+                    var jobTokenResult = JsonConvert.DeserializeObject<JobTokenResult>(jobTokenResultString);
+                    var jobToken = jobTokenResult.Links[0].Href.Split('/')[6];
+
+                    var status = await _queryAppsServices.CheckExportStatus(jobToken);
+                    if (status > 0)
+                    {
+                        var request = await _queryAppsServices.GetDocument(jobToken);
+                        var file = await _queryAppsServices.GetResponseStream(request);
+                        return new FileStreamResult(file, "application/pdf");
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
                 }
                 else
                 {

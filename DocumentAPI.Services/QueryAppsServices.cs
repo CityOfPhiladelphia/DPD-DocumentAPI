@@ -26,25 +26,12 @@ namespace DocumentAPI.Services
         private readonly Config _config;
         private ILogger _logger;
         private readonly DepartmentEntities _departmentEntities;
-        private static IAmazonS3 _s3Client;
-        private readonly string _awsBucket;
-        private static RegionEndpoint _awsRegion;
 
         public QueryAppsServices(HttpClient httpClient, IConfiguration config, ILogger<QueryAppsServices> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
             _config = config.Load();
-
-            _awsBucket = _config.S3BucketName;
-            _awsRegion = RegionEndpoint.GetBySystemName(_config.S3Region);
-            var credentials = new BasicAWSCredentials(_config.S3AccessKeyID, _config.S3SecretAccessKey);
-            var s3Config = new AmazonS3Config
-            {
-                RegionEndpoint = _awsRegion
-            };
-
-            _s3Client = new AmazonS3Client(credentials, s3Config);
 
             _departmentEntities = new DepartmentEntities(config);
         }
@@ -188,7 +175,7 @@ namespace DocumentAPI.Services
             }
         }
 
-        private async Task<QueryAppsResult> RequestDocumentsFromOracle(int entityId, int categoryId)
+        private async Task<QueryAppsResult> RequestDocumentsFromOracle(int entityId, int categoryId, int? documentId = null)
         {
             var entities = await GetEntities();
             var entity = entities.SingleOrDefault(i => i.Id == entityId);
@@ -202,8 +189,14 @@ namespace DocumentAPI.Services
                     try
                     {
                         await axOracleDb.OpenAsync();
-                        var resultDataSet = new DataSet();
-                        cmd.CommandText = $"select DOCID, PAGES from historical where APPID = {category.Id}";
+                        var resultDataSet = new DataSet();                        
+
+                        var commandText = $"select DOCID, PAGES from historical where APPID = {category.Id}";
+                        if (documentId.HasValue)
+                        {
+                            commandText += $" AND DOCID = {documentId}";
+                        }
+                        cmd.CommandText = commandText;
 
                         using (var dataAdapter = new OracleDataAdapter())
                         {
@@ -217,7 +210,6 @@ namespace DocumentAPI.Services
                         {
                             foreach (DataRow row in table.Rows)
                             {
-
                                 var entry = new Entry
                                 {
                                     Id = int.TryParse(row.ItemArray.First().ToString(), out var id) ? id : 0,
@@ -252,34 +244,74 @@ namespace DocumentAPI.Services
             return result;
         }
 
-        public async Task<HttpRequestMessage> BuildDocumentRequest(int entityId, int categoryId, int documentId)
+        public async Task<HttpRequestMessage> StartDocumentRequest(int entityId, int categoryId, int documentId)
         {
-            var requestUrlString = "";
-            var awsObjectKey = $"{categoryId}-{documentId}.pdf";
-            try
+            var getPageCount = RequestDocumentsFromOracle(entityId, categoryId, documentId);
+
+            var requestUrlString = $"{_config.ExportDocsJobPath}/{categoryId}";
+
+            var documents = new List<Dictionary<string, int>>();
+            var document = new Dictionary<string, int>() { { "AppID", categoryId }, { "DocID", documentId } };
+            documents.Add(document);
+
+            var queryAppsResult = await getPageCount;
+            var pageCount = queryAppsResult?.Entries.FirstOrDefault()?.PageCount ?? 1;
+            var exportDocumentRequest = new ExportDocument.InitiateRequest()
             {
-                var requestUrl = new GetPreSignedUrlRequest
-                {
-                    BucketName = _awsBucket,
-                    Key = awsObjectKey,
-                    Expires = DateTime.Now.AddMinutes(2)
-                };
-                requestUrlString = _s3Client.GetPreSignedURL(requestUrl);
-            }
-            catch (AmazonS3Exception e)
-            {
-                Console.WriteLine("AWS error encountered on server. Message:'{0}' when generating a presigned request URL", e.Message);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Unknown error encountered on server. Message:'{0}' when generating a presigned request URL", e.Message);
-            }
+                Documents = documents,
+                UsePDFFormat = true, // can we tell if it's a PDF or not?
+                PageRange = pageCount > 1 ? $"1-{pageCount}" : "1"
+            };
+            var exportDocumentRequestJson = JsonConvert.SerializeObject(exportDocumentRequest);
 
             var requestMessage = new HttpRequestMessage();
             var getFile = new UriBuilder(requestUrlString);
             requestMessage.RequestUri = getFile.Uri;
-            requestMessage.Method = HttpMethod.Get;
+            requestMessage.Method = HttpMethod.Post;
+            requestMessage.Content = new StringContent(exportDocumentRequestJson, Encoding.UTF8, "application/vnd.emc.ax+json");
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
 
+            _logger.LogInformation($"Request built to get document from {requestMessage.RequestUri}");
+
+            return requestMessage;
+        }
+
+        public async Task<int> CheckExportStatus(string jobToken)
+        {
+            var status = 0;
+
+            var requestUrlString = $"{_config.ExportDocsJobPath}/{jobToken}";
+            var requestMessage = new HttpRequestMessage();
+            var getUpdate = new UriBuilder(requestUrlString);
+            requestMessage.RequestUri = getUpdate.Uri;
+            requestMessage.Method = HttpMethod.Get;
+            requestMessage.Headers.Add("Accept", "application/vnd.emc.ax+json");
+            requestMessage.Headers.Add("Connection", "keep-alive");
+            requestMessage.Headers.Add("Keep-Alive", "timeout=600, max=10000");
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
+
+            var response = await GetResponseString(requestMessage);
+            var statusResult = JsonConvert.DeserializeObject<JobTokenResult>(response);
+
+            status = statusResult.Status;
+            if (status == 0)
+            {
+                Task.Delay(5000).Wait();
+                status = await CheckExportStatus(jobToken);
+            }
+
+            return status;
+        }
+
+        public async Task<HttpRequestMessage> GetDocument(string jobToken)
+        {
+            var requestUrlString = $"{_config.ExportResultsPath}/{jobToken}";
+            var requestMessage = new HttpRequestMessage();
+            var getFile = new UriBuilder(requestUrlString);
+            requestMessage.RequestUri = getFile.Uri;
+            requestMessage.Method = HttpMethod.Get;
+            requestMessage.Headers.Add("Accept", "application/vnd.emc.ax+json");
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", _config.Credentials);
             _logger.LogInformation($"Request built to get document from {requestMessage.RequestUri}");
 
             return requestMessage;
@@ -327,11 +359,17 @@ namespace DocumentAPI.Services
             return isPublicDocument;
         }
 
-        public async Task<Stream> GetResponse(HttpRequestMessage requestMessage)
+        public async Task<Stream> GetResponseStream(HttpRequestMessage requestMessage)
         {
             _httpClient.DefaultRequestHeaders.Clear();
             var response = await _httpClient.SendAsync(requestMessage);
             return await response.Content.ReadAsStreamAsync();
+        }
+        public async Task<string> GetResponseString(HttpRequestMessage requestMessage)
+        {
+            _httpClient.DefaultRequestHeaders.Clear();
+            var response = await _httpClient.SendAsync(requestMessage);
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }
