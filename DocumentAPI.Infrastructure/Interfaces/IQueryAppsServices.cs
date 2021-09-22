@@ -11,8 +11,11 @@ namespace DocumentAPI.Infrastructure.Interfaces
         Task<ICollection<Entity>> GetEntities();
         Task<QueryAppsResult> FilterQueryAppsResultByParameters(Category category);
         Task<QueryAppsResult> GetAllDocuments(int entityId, int categoryId);
-        Task<HttpRequestMessage> BuildDocumentRequest(int entityId, int categoryId, int documentId);
+        Task<HttpRequestMessage> StartDocumentRequest(int entityId, int categoryId, int documentId);
+        Task<int> CheckExportStatus(string jobToken);
+        Task<HttpRequestMessage> GetDocument(string jobToken);
         Task<bool> CheckIfDocumentIsPublic(int entityId, int categoryId, int documentId);
-        Task<Stream> GetResponse(HttpRequestMessage requestMessage);
+        Task<Stream> GetResponseStream(HttpRequestMessage requestMessage);
+        Task<string> GetResponseString(HttpRequestMessage requestMessage);
     }
 }

@@ -18,10 +18,8 @@ data "template_file" "dpd_document_api" {
     AdHocQueryResultsPath  = "${var.AdHocQueryResultsPath}"
     SelectIndexLookupPath  = "${var.SelectIndexLookupPath}"
     OracleConnectionString = "${var.OracleConnectionString}"
-    S3BucketName           = "${var.S3BucketName}"
-    S3Region               = "${var.S3Region}"
-    S3AccessKeyID          = "${var.S3AccessKeyID}"
-    S3SecretAccessKey      = "${var.S3SecretAccessKey}"
+    ExportDocsJobPath      = "${var.ExportDocsJobPath}"
+    ExportResultsPath      = "${var.ExportResultsPath}"
   }
 }
 
