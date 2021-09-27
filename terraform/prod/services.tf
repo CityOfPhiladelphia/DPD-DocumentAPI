@@ -7,7 +7,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 # API
 
 data "template_file" "dpd_document_api" {
-  template = "${file("task_definition/dpd-document-api.json")}"
+  template = file("task_definition/dpd-document-api.json")
   vars = {
     project                = "${var.project}"
     environment            = "${var.environment}"
@@ -18,27 +18,25 @@ data "template_file" "dpd_document_api" {
     AdHocQueryResultsPath  = "${var.AdHocQueryResultsPath}"
     SelectIndexLookupPath  = "${var.SelectIndexLookupPath}"
     OracleConnectionString = "${var.OracleConnectionString}"
-    S3BucketName           = "${var.S3BucketName}"
-    S3Region               = "${var.S3Region}"
-    S3AccessKeyID          = "${var.S3AccessKeyID}"
-    S3SecretAccessKey      = "${var.S3SecretAccessKey}"
+    ExportDocsJobPath      = "${var.ExportDocsJobPath}"
+    ExportResultsPath      = "${var.ExportResultsPath}"
   }
 }
 
 resource "aws_ecs_task_definition" "dpd_document_api_task" {
   family                   = "${var.project}-${var.environment}-task"
-  execution_role_arn       = "${aws_iam_role.ecs_task_role.arn}"
+  execution_role_arn       = aws_iam_role.ecs_task_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 256
   memory                   = 1024
-  container_definitions    = "${data.template_file.dpd_document_api.rendered}"
+  container_definitions    = data.template_file.dpd_document_api.rendered
 }
 
 resource "aws_ecs_service" "main" {
   name            = "${var.project}-${var.environment}-service"
-  cluster         = "${aws_ecs_cluster.ecs_cluster.id}"
-  task_definition = "${aws_ecs_task_definition.dpd_document_api_task.arn}"
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  task_definition = aws_ecs_task_definition.dpd_document_api_task.arn
   desired_count   = 2
   launch_type     = "FARGATE"
 
@@ -49,7 +47,7 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.dpd_front_end.arn}"
+    target_group_arn = aws_lb_target_group.dpd_front_end.arn
     container_name   = "${var.project}-${var.environment}-api"
     container_port   = 80
   }
