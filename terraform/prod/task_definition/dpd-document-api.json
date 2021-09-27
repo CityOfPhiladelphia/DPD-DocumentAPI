@@ -26,21 +26,13 @@
         "value": "${OracleConnectionString}"
       },
       {
-        "name": "S3BucketName", 
-        "value": "${S3BucketName}"
+        "name": "ExportDocsJobPath", 
+        "value": "${ExportDocsJobPath}"
       },
       {
-        "name": "S3Region", 
-        "value": "${S3Region}"
-      },
-      {
-        "name": "S3AccessKeyID", 
-        "value": "${S3AccessKeyID}"
-      },
-      {
-        "name": "S3SecretAccessKey",
-        "value": "${S3SecretAccessKey}"
-      }   
+        "name": "ExportResultsPath", 
+        "value": "${ExportResultsPath}"
+      } 
     ],
     "portMappings": [
       {
