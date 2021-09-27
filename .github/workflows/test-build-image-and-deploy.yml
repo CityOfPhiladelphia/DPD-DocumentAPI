@@ -28,7 +28,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           REPOSITORY_URL: 922311303087.dkr.ecr.us-east-1.amazonaws.com/dpd-document-api
         run: |
-          $(aws ecr get-login-password --no-include-email --region us-east-1)
           docker tag dpd-document-api:test-latest $REPOSITORY_URL:test-latest
           docker push $REPOSITORY_URL:test-latest
       - name: Deploy to Fargate
