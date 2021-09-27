@@ -12,13 +12,9 @@ namespace DocumentAPI.Infrastructure.Models
 
         public string OracleConnectionString { get; set; }
 
-        public string S3BucketName { get; set; }
+        public string ExportDocsJobPath { get; set; }
 
-        public string S3Region { get; set; }
-
-        public string S3AccessKeyID { get; set; }
-
-        public string S3SecretAccessKey { get; set; }
+        public string ExportResultsPath { get; set; }
 
     }
 
@@ -32,10 +28,8 @@ namespace DocumentAPI.Infrastructure.Models
                 AdHocQueryResultsPath = config["AdHocQueryResultsPath"],
                 SelectIndexLookupPath = config["SelectIndexLookupPath"],
                 OracleConnectionString = config["OracleConnectionString"],
-                S3BucketName = config["S3BucketName"],
-                S3Region = config["S3Region"],
-                S3AccessKeyID = config["S3AccessKeyID"],
-                S3SecretAccessKey = config["S3SecretAccessKey"],
+                ExportDocsJobPath = config["ExportDocsJobPath"],
+                ExportResultsPath = config["ExportResultsPath"],
             };
         }
     }
